@@ -103,7 +103,7 @@ class LWX {
 
         if(Array.isArray(obj))
         {
-            obj.forEach(function(item){
+            obj.forEach(item =>{
               this.#finalize(item)
             });
         }
@@ -534,8 +534,14 @@ class LWX {
             if (i == this.#nodes.length - 1) {
                 if (data && data.trim())
                 {
-                    // insert any data/new tag data here               
-                    previous[this.#nodes[i].name] = data
+                    // insert any data/new tag data here   
+                    if (Array.isArray(previous[this.#nodes[i].name]))
+                    {
+                        previous[this.#nodes[i].name] [previous[this.#nodes[i].name].length - 1] = data
+                    } else
+                    {
+                        previous[this.#nodes[i].name] = data
+                    }         
                 }
             }
 
