@@ -1,5 +1,4 @@
 ## **Description**
-update
 LWX was inspired by the need for an extremely lightweight performant XML parser. XML is part of every day business life and therefore extremely important to get right. This parser is around only 400 lines of well-documented code. To make sure LWX adheres to industry standards, the standard authority for XML structure is being used [REC-xml-19980210](https://www.w3.org/TR/1998/REC-xml-19980210)
 
 ## **Features**
