@@ -1,0 +1,24 @@
+<?DOCTYPE xml>
+
+<person xml:space="default">
+    <employee>
+        <name>
+            <first>
+                data
+            </first>
+        </name>
+        <name>
+            <first>
+                   John<!-- My comment--> Smith
+            </first>
+            <last>
+                Gringo
+            </last>
+        </name>
+        <name>
+            <first>
+                    Jimmy Carter
+            </first>
+        </name>
+    </employee>
+</person>
