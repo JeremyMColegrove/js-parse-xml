@@ -3,13 +3,19 @@
 
 // xml schema to implement rules for this parser
 // https://www.w3.org/TR/1998/REC-xml-19980210
-
 import chalk from 'chalk'
+import fs from 'fs'
+import es from 'event-stream'
+
 
 /**
  * XML class
  * 
  */
+
+
+
+
 class light_xml_parser {
     constructor() {
         /**
@@ -71,6 +77,52 @@ class light_xml_parser {
 
         //how many errors
         this.errors = 0
+    }
+    /**
+     * Streams an XML document from disk ( for large files )
+     * @param {string} filename The filename of the XML
+     * @returns {object}
+     */
+    stream_xml(filename)
+    {
+        // stream XML line by line (for large file types)
+        return new Promise((resolve, reject)=>{
+            var s = fs.createReadStream('xml.xml')
+                .pipe(es.split())
+                .pipe(es.mapSync(function(line){
+                    // pause the readstream
+                    s.pause();
+                    this.parse_line(line)
+                    // resume the readstream, possibly from a callback
+                    s.resume();
+                })
+                .on('error', function(err){
+                    reject(err)
+                })
+                .on('end', function(){
+                    resolve(this.get_result())
+                })
+            );
+        })
+    }
+    /**
+     * Reads an XML document from disk
+     * @param {string} filename 
+     * @returns {object|Error}
+     */
+    parse_xml(filename)
+    {
+        // parse the XML all in one big chunk
+        return new Promise((resolve, reject)=>{
+            fs.readFile(filename, 'utf-8', (err, data)=>{
+                if (err) {
+                    reject(err)
+                }
+                this.parse_line(data)
+                resolve(this.get_result())
+            })
+        })
+        
     }
 
     /**
@@ -193,7 +245,7 @@ class light_xml_parser {
     /**
      * Parses a line of XML
      * @param {string} xml - The line of XML to parse
-     * @returns null
+     * @returns {void}
      */
     parse_line(xml)
     {
