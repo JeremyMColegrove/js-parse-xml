@@ -7,11 +7,11 @@ LWX also has noteable features such as its ability to stream files, which allows
 ## **Getting Started**
 Getting started is very easy. All you need to do is import/require the module
 ```
-import LWX from 'lwx-parser'
+import LWX from './lwx/lwx'
 ``` 
 or 
 ```
-let LWX = require('lwx-parser')
+let LWX = require('./lwx/lwx')
 ```
 ### **Parsing XML**
 LWX is a promise based XML parser. Therefore, in order to parse XML you can choose to use either async/await
@@ -43,6 +43,8 @@ You can then make a pull request with the change. This pull request will be revi
 1. PR must have a clear description of what changed
 2. PR must have a clear description of why it was changed
 3. All tests must pass with no errors or warnings found (not implemented currently)
+4. All changes must be documents using JSDoc syntax
+5. All JSDocs must be re-made by running ```npm run doc``` with no errors or warnings
 
 ### **Testing**
 Testing is extremely important when it comes to parsers due to the wide range of inputs it can see. For this purpose, LWX relies on the [XML W3C Conformance Test Suite 20130923](https://www.w3.org/XML/Test/) from IBM. TODO: These tests are not currently working, and have not been verified against the parser yet. This is a must-have and will be fixed in a future release.
