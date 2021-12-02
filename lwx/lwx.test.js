@@ -23,21 +23,21 @@ function run_all_tests()
 
 
             // test with file streaming
-            test("stream " + file, async ()=>{
+            test(file + " Streaming file", async ()=>{
                 let parser = new LWX()
                 let result = await parser.stream_file(file_path)
                 expect(result).toStrictEqual(output)
             })
 
             // test file without streaming
-            test("parse " + file, async ()=>{
+            test(file + " All at once", async ()=>{
                 let parser = new LWX()
                 let result = await parser.parse_file(file_path)
                 expect(result).toStrictEqual(output)
             })
 
             // test file with just text
-            test("text " + file, async ()=>{
+            test(file + " Given as text", async ()=>{
                 let input = fs.readFileSync(file_path, 'utf-8')
 
                 let parser = new LWX()
