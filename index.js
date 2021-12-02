@@ -3,8 +3,8 @@ import LWX from './lwx/lwx.js';
 
 async function get_xml() {
     var p = new LWX()
-    let obj = await p.parse_file("./xml.xml")
-    console.log(obj)
+    let obj = await p.stream_file("./lwx/tests/002.xml")
+    console.log(JSON.stringify(obj, null, 2))
 }
 
 get_xml()

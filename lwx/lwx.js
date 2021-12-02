@@ -51,8 +51,14 @@ class LWX {
          * 
          */
 
+        this.#reset_parser()
+    }
 
-        //ALL OF THESE PROPERTIES ARE PRIVATE 
+    /**
+     * Resets all internal variables used for parsing
+     */
+    #reset_parser()
+    {
         this.#token = ''
 
         this.#index = -1
@@ -69,7 +75,6 @@ class LWX {
 
         this.#end_tag = 0
 
-        //tag attribute properties ( whitespace )
         this.#preserve = "preserve"
 
         this.#default = "default"
@@ -78,8 +83,21 @@ class LWX {
 
         this.#in_comment = false
 
-        //how many errors
         this.#errors = 0
+    }
+
+    /**
+     * Removes all built in metadata used while constructing the object (all __id keys)
+     * @param {Object} obj 
+     */
+    #finalize(obj)
+    {
+        for(var prop in obj) {
+            if (prop === '__id')
+            delete obj[prop];
+            else if (typeof obj[prop] === 'object')
+            this.#finalize(obj[prop]);
+        }
     }
 
     /**
@@ -89,26 +107,34 @@ class LWX {
      */
     stream_file(filename)
     {
+        this.#reset_parser()
         // stream XML line by line (for large file types)
         return new Promise((resolve, reject)=>{
-            var s = fs.createReadStream('xml.xml')
+            var s = fs.createReadStream(filename)
                 .pipe(es.split())
-                .pipe(es.mapSync(function(line){
+                .pipe(es.mapSync(line => {
+                    // create a new parse object
+                    
                     // pause the readstream
                     s.pause();
-                    this.parse_line(line)
+
+                    this.#parse_line(line)
+
                     // resume the readstream, possibly from a callback
                     s.resume();
                 })
-                .on('error', function(err){
+                .on('error', err => {
                     reject(err)
                 })
-                .on('end', function(){
-                    resolve(this.get_result())
+                .on('end', ()=> {
+                    this.#finalize(this.#result)
+                    resolve(this.#result)
                 })
             );
         })
     }
+
+    
 
     /**
      * Parses an XML string
@@ -120,6 +146,7 @@ class LWX {
         return new Promise((resolve, reject)=> {
             try {
                 this.#parse_line(xml)
+                this.#finalize(this.#result)
                 resolve(this.#result)
             } catch (e) {
                 reject(e)
@@ -141,6 +168,7 @@ class LWX {
                     reject(err)
                 }
                 this.#parse_line(data)
+                this.#finalize(this.#result)
                 resolve(this.#result)
             })
         })
@@ -181,10 +209,20 @@ class LWX {
      */
     #is_end_tag(tag)
     {
-        if (tag.charAt(0) == "/" || tag.charAt(tag.length-1)=="/") return true
+        if (tag.charAt(0) == "/") return true
         return false
     }
 
+    /**
+     * Checks if a given tag is self closing
+     * @param {string} tag Tag to check 
+     * @returns  {boolean}
+     */
+    #is_self_closing(tag)
+    {
+        if (tag.charAt(tag.length - 1) == "/") return true
+        return false
+    }
     /**
      * Checks if given tag is a parameter tag
      * @param {string} tag - Tag to check
@@ -401,8 +439,11 @@ class LWX {
                 }
             }
 
-            // push the new node on
-            this.#nodes.push(new_node)
+            // push the new node on only if it is not self_closing
+            if (!this.#is_self_closing(tag))
+            {
+                this.#nodes.push(new_node)
+            }
 
             // traverse the tree when a new node is discovered in case the node contains important properties
             // about reading data in the node (like whitespace)
