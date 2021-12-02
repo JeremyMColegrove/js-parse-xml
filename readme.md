@@ -5,7 +5,8 @@ LWX was inspired by the need for an extremely lightweight performant XML parser.
 LWX also has noteable features such as its ability to stream files, which allows for arbitrarily large XML file sizes.
 
 ## **Getting Started**
-Getting started is very easy. All you need to do is import/require the module
+Getting started is very easy. Once you have cloned the repo, simply run npm install inside the projects directory. From there, you should be able to use it in all of your projects.
+
 ```
 import LWX from './lwx/lwx'
 ``` 
@@ -30,7 +31,7 @@ parser.parse_xml("./filename.xml").then(result=>{
     // do whatever with the error here
 })
 ```
-
+Or any other asynchronous calls available to you in JavaScript!
 
 ## **Contributing**
 ### **Overview**
@@ -47,7 +48,11 @@ You can then make a pull request with the change. This pull request will be revi
 5. All JSDocs must be re-made by running ```npm run doc``` with no errors or warnings
 
 ### **Testing**
-Testing is extremely important when it comes to parsers due to the wide range of inputs it can see. For this purpose, LWX relies on the [XML W3C Conformance Test Suite 20130923](https://www.w3.org/XML/Test/) from IBM. TODO: These tests are not currently working, and have not been verified against the parser yet. This is a must-have and will be fixed in a future release.
+
+You can run tests by running ```npm test```
+Testing is extremely important when it comes to parsers due to the wide range of inputs it can see. For this purpose, LWX will rely on the [XML W3C Conformance Test Suite 20130923](https://www.w3.org/XML/Test/) from IBM. TODO: These tests are not currently working, and have not been verified against the parser yet. This is a must-have and will be fixed in a future release.
+
+As of right now, only our own tests are implemented. While this is better than nothing, we want to move to a standardized testing to make sure LWX performs in all scenarios.
 
 
 

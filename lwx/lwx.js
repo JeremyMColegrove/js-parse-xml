@@ -92,14 +92,31 @@ class LWX {
      */
     #finalize(obj)
     {
+        let key = "__id"
+
         for(var prop in obj) {
-            if (prop === '__id')
+            if (prop === key)
             delete obj[prop];
             else if (typeof obj[prop] === 'object')
             this.#finalize(obj[prop]);
         }
+
+        if(Array.isArray(obj))
+        {
+            obj.forEach(function(item){
+              this.#finalize(item)
+            });
+        }
+        else if(typeof obj === 'object' && obj != null)
+        {
+            Object.getOwnPropertyNames(obj).forEach(item=>{
+                if(item == key) delete obj[key];
+                else this.#finalize(obj[item]);
+            });
+        }
     }
 
+    //ISSUE this might be very slow for LARGE XML files and objects...
     /**
      * Streams an XML document from disk ( for large files )
      * @param {string} filename The filename of the XML
@@ -176,7 +193,7 @@ class LWX {
     }
 
     /**
-     * Prints out a warning to the consol
+     * Prints out a warning to the console
      * @param {string|number} message - The message to print out
      */
     #warning(message)
@@ -447,16 +464,16 @@ class LWX {
 
             // traverse the tree when a new node is discovered in case the node contains important properties
             // about reading data in the node (like whitespace)
-            this.#update_tree()
-
+            this.#update_tree(null, tag_split)
         }
     }
 
     /**
      * Updates the tree using the path from {@link #nodes}, and insert data if needed
-     * @param {string|void} data 
+     * @param {string|void} [data] Data inside of tags
+     * @param {Array} [attributes] Tag attributes
      */
-    #update_tree(data=null)
+    #update_tree(data=null, attributes=null)
     {
         // takes in the tree node and the parent and will construct object for result tree
         function construct_new_node(node)
@@ -471,7 +488,6 @@ class LWX {
 
 
         // reset any parser params here (like whitespace attribute)
-
         this.#white_space = this.#default
         let previous = this.#result
         let branch
@@ -509,10 +525,18 @@ class LWX {
             // update any params based on the attributes of the node just entered (white space and such)
             if (branch.__white_space) this.#white_space = branch.__white_space
 
-
+            // insert any attributes here
             // if it is the last node, replace the default object with the desired data
-            if (i == this.#nodes.length - 1 && data && data.trim()) {
-                previous[this.#nodes[i].name] = data
+            /***
+             * TODO use the attributes to insert attributes followed by @ sign in the node.
+             * ISSUE how do we handle a tag with both an attribute and data? ignore the attribute?
+             * */
+            if (i == this.#nodes.length - 1) {
+                if (data && data.trim())
+                {
+                    // insert any data/new tag data here               
+                    previous[this.#nodes[i].name] = data
+                }
             }
 
             previous = branch
