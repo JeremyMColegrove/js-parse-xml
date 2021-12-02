@@ -1,12 +1,11 @@
 //make a recursive decent parser that parses the XML into a json object
-import parser from './xml_parser/xml-parser.js';
+import LWX from './lwx/lwx.js';
 
-async function get_xml(){
-    var p = new parser()
-    let obj = await p.parse_xml("./xml.xml")
+async function get_xml() {
+    var p = new LWX()
+    let obj = await p.parse_file("./xml.xml")
     console.log(obj)
 }
-
 
 get_xml()
 
