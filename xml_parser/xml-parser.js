@@ -131,7 +131,7 @@ class light_xml_parser {
             // 2.8 Prolog and Document Type Declaration
             // The document type declaration must appear before the first element in the document.
             if (this.nodes.length > 0)
-                this.warning("The document type decleration must appear before the first element in the document")
+                this.warning("The document type declaration must appear before the first element in the document")
             return true
         }
         return false

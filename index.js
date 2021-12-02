@@ -24,7 +24,6 @@ var s = fs.createReadStream('xml.xml')
     })
     .on('end', function(){
         console.log(JSON.stringify(p.get_result(), null, 2))
-        // console.log(p.get_result())
     })
 );
 

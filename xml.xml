@@ -1,22 +1,28 @@
-<?DOCTYPE xml>
+<!-- xml space defau is not valid, only default and preserve-->
+<person xml:space="defau">
+<!-- This xml tag should be before the root node person -->
+    <?xml person>
 
-<person xml:space="default">
     <employee>
         <name>
             <first>
                 data
             </first>
+            <!-- Having two root nodes is not legal in XML-->
+            <person>
+                George
+            </person>
         </name>
         <name>
             <first>
                    John<!-- My comment--> Smith
             </first>
             <last>
-                Gringo
+                <![CDATA[<greeting></greeting>]]>
             </last>
         </name>
         <name>
-            <first>
+            <first xml:space="preserve">
                     Jimmy Carter
             </first>
         </name>
