@@ -1,19 +1,18 @@
-
 // @ts-check
+import fs from 'fs'
+import es from 'event-stream'
 
 // xml schema to implement rules for this parser
 // https://www.w3.org/TR/1998/REC-xml-19980210
 // import chalk from 'chalk'
-import fs from 'fs'
-import es from 'event-stream'
-
 
 /**
  * LWX class
  * 
  */
 
-class LWX {
+class LWX 
+{
     #token
     #index
     #result
@@ -28,16 +27,8 @@ class LWX {
     #in_comment
     #errors
 
-
-    constructor() {
-        // /**
-        //  * A node object that is part of {@link #nodes} which track current path through XML
-        //  * @typedef {Object} Node
-        //  * @property {number} __id - Node ID
-        //  * @property {string} [__white_space] - Whitespace value
-        //  * @property {string} name - Node name
-        //  */
-
+    constructor() 
+    {
         /**
          * @property {string} token current token it is parsing
          * @property {number} index current index it is parsing
@@ -94,7 +85,8 @@ class LWX {
     {
         let key = "__id"
 
-        for(var prop in obj) {
+        for(var prop in obj) 
+        {
             if (prop === key)
             delete obj[prop];
             else if (typeof obj[prop] === 'object')
@@ -103,20 +95,19 @@ class LWX {
 
         if(Array.isArray(obj))
         {
-            obj.forEach(item =>{
+            obj.forEach(item => {
               this.#finalize(item)
             });
         }
         else if(typeof obj === 'object' && obj != null)
         {
-            Object.getOwnPropertyNames(obj).forEach(item=>{
+            Object.getOwnPropertyNames(obj).forEach(item=> {
                 if(item == key) delete obj[key];
                 else this.#finalize(obj[item]);
             });
         }
     }
 
-    //ISSUE this might be very slow for LARGE XML files and objects...
     /**
      * Streams an XML document from disk ( for large files )
      * @param {string} filename The filename of the XML
@@ -126,7 +117,7 @@ class LWX {
     {
         this.#reset_parser()
         // stream XML line by line (for large file types)
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject)=> {
             var s = fs.createReadStream(filename)
                 .pipe(es.split())
                 .pipe(es.mapSync(line => {
@@ -151,8 +142,6 @@ class LWX {
         })
     }
 
-    
-
     /**
      * Parses an XML string
      * @param {string} xml The XML to parse 
@@ -161,11 +150,13 @@ class LWX {
     parse_xml(xml)
     {
         return new Promise((resolve, reject)=> {
-            try {
+            try 
+            {
                 this.#parse_line(xml)
                 this.#finalize(this.#result)
                 resolve(this.#result)
-            } catch (e) {
+            } catch (e) 
+            {
                 reject(e)
             }
         })
@@ -180,16 +171,14 @@ class LWX {
     {
         // parse the XML all in one big chunk
         return new Promise((resolve, reject)=>{
-            fs.readFile(filename, 'utf-8', (err, data)=>{
-                if (err) {
-                    reject(err)
-                }
+            fs.readFile(filename, 'utf-8', (err, data)=> {
+                if (err) reject(err)
+                
                 this.#parse_line(data)
                 this.#finalize(this.#result)
                 resolve(this.#result)
             })
         })
-        
     }
 
     /**
@@ -200,7 +189,6 @@ class LWX {
     {
         // console.log(chalk.yellow(`${++this.errors}) Warning: ${message}`))
         console.log(`${++this.#errors}) Warning: ${message}`)
-
     }
 
     /**
@@ -240,6 +228,7 @@ class LWX {
         if (tag.charAt(tag.length - 1) == "/") return true
         return false
     }
+
     /**
      * Checks if given tag is a parameter tag
      * @param {string} tag - Tag to check
@@ -302,6 +291,7 @@ class LWX {
         cdata = cdata.substring(8, cdata.length - 3)
         this.#data += cdata
     }
+
     /**
      * Data split up on multiple lines gets processed correctly, but tags split on differnet lines do not
      * TODO: allow for tags to be split on multiple lines
@@ -489,8 +479,11 @@ class LWX {
 
         // reset any parser params here (like whitespace attribute)
         this.#white_space = this.#default
+
         let previous = this.#result
+
         let branch
+
         for (var i=0; i<this.#nodes.length; i++)
         {
 
@@ -531,10 +524,11 @@ class LWX {
              * TODO use the attributes to insert attributes followed by @ sign in the node.
              * ISSUE how do we handle a tag with both an attribute and data? ignore the attribute?
              * */
-            if (i == this.#nodes.length - 1) {
+            if (i == this.#nodes.length - 1) 
+            {
                 if (data && data.trim())
                 {
-                    // insert any data/new tag data here   
+                    // insert any data/new tag data here
                     if (Array.isArray(previous[this.#nodes[i].name]))
                     {
                         previous[this.#nodes[i].name] [previous[this.#nodes[i].name].length - 1] = data
@@ -544,7 +538,6 @@ class LWX {
                     }         
                 }
             }
-
             previous = branch
         }
     }
