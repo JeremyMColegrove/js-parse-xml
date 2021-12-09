@@ -163,13 +163,13 @@ class LWX
          * 
          */
 
-        this.#reset_parser()
+        this.reset_parser()
     }
 
     /**
      * Resets all internal variables used for parsing
      */
-    #reset_parser()
+    reset_parser()
     {
         this.#token = ''
 
@@ -202,7 +202,7 @@ class LWX
      * Removes all built in metadata used while constructing the object (all __id keys)
      * @param {Object} obj 
      */
-    #finalize(obj)
+    finalize(obj)
     {
         let key = "__id"
 
@@ -211,33 +211,33 @@ class LWX
             if (prop === key)
             delete obj[prop];
             else if (typeof obj[prop] === 'object')
-            this.#finalize(obj[prop]);
+            this.finalize(obj[prop]);
         }
 
         if(Array.isArray(obj))
         {
             obj.forEach(item => {
-              this.#finalize(item)
+              this.finalize(item)
             });
         }
         else if(typeof obj === 'object' &amp;&amp; obj != null)
         {
             Object.getOwnPropertyNames(obj).forEach(item=> {
                 if(item == key) delete obj[key];
-                else this.#finalize(obj[item]);
+                else this.finalize(obj[item]);
             });
         }
     }
 
     get_result() {
-        this.#finalize(this.#result)
+        this.finalize(this.#result)
         return this.#result
     }
     /**
      * Prints out a warning to the console
      * @param {string|number} message - The message to print out
      */
-    #warning(message)
+    warning(message)
     {
         // console.log(chalk.yellow(`${++this.errors}) Warning: ${message}`))
         console.log(`${++this.#errors}) Warning: ${message}`)
@@ -248,7 +248,7 @@ class LWX
      * @param {string} xml - The xml string we are parsing
      * @returns {boolean}
      */
-    #eat_char(xml)
+    eat_char(xml)
     {
         this.#index ++
         if (this.#index &lt; xml.length)
@@ -264,7 +264,7 @@ class LWX
      * @param {string} tag - Tag to check
      * @returns {boolean}
      */
-    #is_end_tag(tag)
+    is_end_tag(tag)
     {
         if (tag.charAt(0) == "/") return true
         return false
@@ -275,7 +275,7 @@ class LWX
      * @param {string} tag Tag to check 
      * @returns  {boolean}
      */
-    #is_self_closing(tag)
+    is_self_closing(tag)
     {
         if (tag.charAt(tag.length - 1) == "/") return true
         return false
@@ -286,7 +286,7 @@ class LWX
      * @param {string} tag - Tag to check
      * @returns {boolean}
      */
-    #is_param_tag(tag)
+    is_param_tag(tag)
     {
         let first_letter = tag.charAt(0)
         if (first_letter == "?" || first_letter == "!" ) 
@@ -294,7 +294,7 @@ class LWX
             // 2.8 Prolog and Document Type Declaration
             // The document type declaration must appear before the first element in the document.
             if (this.#nodes.length > 0)
-                this.#warning("The document type declaration must appear before the first element in the document")
+                this.warning("The document type declaration must appear before the first element in the document")
             return true
         }
         return false
@@ -305,7 +305,7 @@ class LWX
      * @param {string} xml - XML string
      * @returns {boolean}
      */
-    #is_cdata_tag(xml)
+    is_cdata_tag(xml)
     {
         let cdata_tag = xml.substring(this.#start_tag, this.#start_tag + 9)
         if (cdata_tag == "&lt;![CDATA[") return true
@@ -317,7 +317,7 @@ class LWX
      * @param {string} xml - XML string
      * @returns {boolean}
      */
-    #is_comment_tag(xml)
+    is_comment_tag(xml)
     {
         let comment_tag = xml.substring(this.#start_tag, this.#start_tag + 4)
         if (comment_tag == "&lt;!--") return true
@@ -329,12 +329,12 @@ class LWX
      * Will eat the XML until it finds closing tags
      * @param {string} xml - The XML we are parsing
      */
-    #extract_cdata(xml)
+    extract_cdata(xml)
     {
         // get all of the CDATA string
         let cdata = ""
         // read forward until ]]> tag is found
-        while (this.#eat_char(xml) &amp;&amp; !cdata.endsWith("]]>"))
+        while (this.eat_char(xml) &amp;&amp; !cdata.endsWith("]]>"))
         {
             cdata += this.#token
         }
@@ -373,7 +373,7 @@ class LWX
         this.#end_tag = -1
         this.#start_tag = -1
         // go through all of the characters
-        while (this.#eat_char(xml))
+        while (this.eat_char(xml))
         {
             // if we find the start of a tag
             if (this.#token == "&lt;")
@@ -384,15 +384,15 @@ class LWX
                 // w3 2.7 CDATA &lt;![CDATA[&lt;greeting>&lt;/greeting>]]> should be treated as data not XML
                 // look for &lt;![CDATA[ start tag
                 
-                if (this.#is_cdata_tag(xml))
+                if (this.is_cdata_tag(xml))
                 {
-                    this.#extract_cdata(xml)   
+                    this.extract_cdata(xml)   
                 }
                 
                 // try and get the data between end and start tags (if any)
                 else if (this.#start_tag > 0)
                 {
-                    if (this.#is_comment_tag(xml))
+                    if (this.is_comment_tag(xml))
                     {
                         //this will ignore all tags and data until > is found
                         this.#in_comment = true
@@ -422,9 +422,9 @@ class LWX
                 if (tag.trim())
                 {   
 
-                    if (!this.#is_param_tag(tag))
+                    if (!this.is_param_tag(tag))
                     {
-                        this.#parse_tag(tag, this.#data)
+                        this.parse_tag(tag, this.#data)
                         // clear all of the data
                         this.#data = ""
                     } 
@@ -452,10 +452,13 @@ class LWX
      * @param {string} tag The tag to pre-process 
      * @returns {string}
      */
-    #preprocess_tag(tag) {
+    preprocess_tag(tag) {
         // tags will not have any / in them. this is a basic rule of xml, and also removes / from self closing tags
         // @ts-ignore
-        tag = tag.replaceAll('/', '')
+
+        const searchRegExp = /\//g;
+        const replaceWith = '';
+        tag = tag.replace(searchRegExp, replaceWith);
 
         // also split any namespaces from the tag
         let tag_split = tag.split(":")
@@ -464,21 +467,21 @@ class LWX
         return tag
     }
 
-    
+
     /**
      * Takes a tag and parses it, and adds it into the {@link #result} object
      * @param {string} tag 
      * @param {string|void} data 
      */
-    #parse_tag(tag, data)
+    parse_tag(tag, data)
     {
         // split the tag up into its important parts
         let tag_split = tag.split(/[= ]/)
 
-        if (this.#is_end_tag(tag))
+        if (this.is_end_tag(tag))
         {
             // we have an end tag, add the data and all branches
-            this.#update_tree(data)
+            this.update_tree(data)
             // remove the last node from the tree
             this.#nodes.pop()
         }
@@ -486,7 +489,7 @@ class LWX
         {
             // w3 2.2: check if root node is the only node that exists (it should)
             if (this.#nodes.length > 0 &amp;&amp; tag_split[0] == this.#nodes[0].name)
-                this.#warning(`Root node '${tag_split[0]}' should only appear once.`)
+                this.warning(`Root node '${tag_split[0]}' should only appear once.`)
 
             
             // split the tag into important parts
@@ -494,11 +497,11 @@ class LWX
 
             // w3 2.3: check if tag contains ; (reserved for experimental namespaces)
             if (tag_split[0].includes(";"))
-                this.#warning(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
+                this.warning(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
 
             
             // construct the new node
-            let new_node = {name:this.#preprocess_tag(tag_split[0]), __id:this.#highest_id++}
+            let new_node = {name:this.preprocess_tag(tag_split[0]), __id:this.#highest_id++}
 
             // 2.10 White Space Handling
             // check for white space declarations
@@ -508,33 +511,35 @@ class LWX
                 {
                     if (i &lt; tag_split.length-1)
                     {
-                        // @ts-ignore
-                        let space = tag_split[i+1].replaceAll("\"", "")
+                        const searchRegExp = /\"/g;
+                        const replaceWith = '';
+                        let space = tag_split[i+1].replace(searchRegExp, replaceWith);
+                        
                         if (space != this.#default &amp;&amp; space != this.#preserve)
                         {
-                            this.#warning(`Invalid xml:space value '${space}' found. Valid values are 'default' and 'preserve'.`)
+                            this.warning(`Invalid xml:space value '${space}' found. Valid values are 'default' and 'preserve'.`)
                         } else
                         {
                             new_node.__white_space = space
                         }
                     } else
                     {
-                        this.#warning("Invalid XML markup found for attribute xml:space")
+                        this.warning("Invalid XML markup found for attribute xml:space")
                     }
                 }
             }
             
             // push the new node on only if it is not self_closing
-            if (!this.#is_self_closing(tag))
+            if (!this.is_self_closing(tag))
             {
                 this.#nodes.push(new_node)
                 // traverse the tree when a new node is discovered in case the node contains important properties
                 // about reading data in the node (like whitespace)
-                this.#update_tree(null, tag_split)
+                this.update_tree(null, tag_split)
             } else {
                 new_node.self_closing = true
                 this.#nodes.push(new_node)
-                this.#update_tree(null, tag_split)
+                this.update_tree(null, tag_split)
                 this.#nodes.pop()
             }
 
@@ -547,7 +552,7 @@ class LWX
      * @param {string|void} [data] Data inside of tags
      * @param {Array} [attributes] Tag attributes
      */
-    #update_tree(data=null, attributes=null)
+    update_tree(data=null, attributes=null)
     {
         // takes in the tree node and the parent and will construct object for result tree
         function construct_new_node(node)
@@ -653,7 +658,7 @@ module.exports = {parseFile, parseFileSync, parseString, parseStringSync}</code>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Dec 09 2021 11:41:14 GMT-0600 (Central Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Dec 09 2021 12:19:00 GMT-0600 (Central Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
