@@ -1,25 +1,20 @@
 {
-  "name": "xml-parser",
-  "version": "1.0.0",
-  "description": "Node-JS lightweight xml parser",
-  "main": "index.js",
-  "type": "module",
+  "name": "js-parse-xml",
+  "version": "1.0.8",
+  "description": "lightweight Node-JS xml parser",
+  "main": "js-parse-xml.js",
   "scripts": {
-    "doc": "jsdoc -c ./lwx/jsdoc.json",
+    "doc": "jsdoc -c ./jsdoc.json",
     "start": "node index.js",
     "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest"
   },
+  "files": [
+    "js-parse-xml.js",
+    "readme.md"
+  ],
   "author": "Jeremy Colegrove",
   "license": "ISC",
   "dependencies": {
-    "babel-jest": "^27.4.2",
-    "chalk": "^5.0.0",
-    "event-stream": "^4.0.1",
-    "jest": "^27.4.3",
-    "ts-jest": "^27.0.7"
-  },
-  "devDependencies": {
-    "@babel/preset-env": "^7.16.4",
-    "@types/jest": "^27.0.3"
+    "event-stream": "^4.0.1"
   }
 }
