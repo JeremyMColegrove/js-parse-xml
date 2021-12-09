@@ -2,3 +2,4 @@
 ./lwx/tests
 node_modules
 ./xmlconfig
+./out

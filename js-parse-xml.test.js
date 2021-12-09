@@ -1,4 +1,4 @@
-let parser = require('../js-parse-xml')
+let parser = require('./js-parse-xml')
 let fs = require('fs')
 
 /***

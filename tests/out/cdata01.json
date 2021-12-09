@@ -1,0 +1,9 @@
+{
+    "test":{
+        "space":[
+            "   <xml>content</xml>",
+            "<xml>content</xml>",
+            "<xml>content</xml>"
+        ]
+    }
+}

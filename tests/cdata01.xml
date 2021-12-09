@@ -1,0 +1,5 @@
+<test>
+    <space xml:space="preserve"><![CDATA[   <xml>content</xml>]]></space>
+    <space xml:space="default"><![CDATA[   <xml>content</xml>]]></space>
+    <space><![CDATA[   <xml>content</xml>]]></space>
+</test>

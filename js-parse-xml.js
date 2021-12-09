@@ -3,23 +3,49 @@ const fs = require('fs')
 const es = require('event-stream')
 
 
+const LINE_ONLY = "%s\x1b[0m"
+const YELLOW = "\x1b[33m%s\x1b[0m"
+const RED = "\x1b[31m"
+const BLACK = "\x1b[30m"
+//Background colors
+const BGRED = "\x1b[41m"
+const BGYELLOW = "\x1b[43m"
+
+const RESET = "\x1b[0m"
+
+
 // xml schema to implement rules for this parser
 // https://www.w3.org/TR/1998/REC-xml-19980210
 
+function warn(message) {
+    console.warn(BGYELLOW, BLACK, message, RESET)
+}
+function error(message) {
+    console.error(BGRED, BLACK, message, RESET)
+}
 
 /**
- * Functions for parsing
+ * 
+ * @param {string} filename Relative or absolute path to XML file.
+ * @param {Object} options XML parsing options
+ * @returns {Object}
  */
 function parseFileSync(filename, options={})
 {
-    if (options.stream) console.error("\x1b[33m%s\x1b[0m", "js-parse-xml warning: flag 'stream' will be ignored by synchronous call. Use parseFile() to stream file.")
-    // console.log(filename, options)
+    if (options.stream) warn("js-parse-xml warning: flag 'stream' will be ignored by synchronous call. Use parseFile() to stream file.")
+    
     let lwx_parser = new LWX()
     let data = fs.readFileSync(filename, 'utf-8')
     lwx_parser.parse_line(data)
     return lwx_parser.get_result()
 }
 
+/**
+ * 
+ * @param {string} xml XML string to parse
+ * @param {Object} options XML parsing options
+ * @returns {Object}
+ */
 function parseStringSync(xml, options={})
 {
     let lwx_parser = new LWX()
@@ -27,6 +53,12 @@ function parseStringSync(xml, options={})
     return lwx_parser.get_result()
 }
 
+/**
+ * 
+ * @param {string} xml XML string to parse
+ * @param {Object} options XML parsing options
+ * @returns {Promise}
+ */
 async function parseString(xml, options={})
 {
     return new Promise((resolve, reject)=> {
@@ -34,6 +66,12 @@ async function parseString(xml, options={})
     })
 }
 
+/**
+ * 
+ * @param {string} filename Relative or absolute path to XML file.
+ * @param {Object} options XML parsing options
+ * @returns {Promise}
+ */
 async function parseFile(filename, options={})
 {
     return new Promise((resolve, reject)=> {
@@ -45,8 +83,10 @@ async function parseFile(filename, options={})
 
         let lwx_parser = new LWX()
         // stream the file
-        fs.createReadStream(filename, 'utf-8')
+        fs.createReadStream(filename, 'utf8')
         .on('data', (chunk)=> {
+            // in case it reads in the chunk as a buffer
+            if (chunk instanceof Buffer) chunk = chunk.toString('utf8')
             lwx_parser.parse_line(chunk)
         })
         .on('end', ()=>{
@@ -270,9 +310,17 @@ class LWX
         {
             cdata += this.#token
         }
-        this.#end_tag = this.#index+1
+
+        // start both the end and start tag from the same place
+        this.#end_tag = this.#index
         this.#start_tag = this.#index
+        // extract the cdata from the string
         cdata = cdata.substring(8, cdata.length - 3)
+
+        if (this.#white_space == this.#default) 
+            cdata = cdata.trim()
+
+        
         this.#data += cdata
     }
 
@@ -372,6 +420,24 @@ class LWX
     }
 
     /**
+     * 
+     * @param {string} tag The tag to pre-process 
+     * @returns {string}
+     */
+    #preprocess_tag(tag) {
+        // tags will not have any / in them. this is a basic rule of xml, and also removes / from self closing tags
+        // @ts-ignore
+        tag = tag.replaceAll('/', '')
+
+        // also split any namespaces from the tag
+        let tag_split = tag.split(":")
+        tag = tag_split[tag_split.length-1]
+
+        return tag
+    }
+
+    
+    /**
      * Takes a tag and parses it, and adds it into the {@link #result} object
      * @param {string} tag 
      * @param {string|void} data 
@@ -401,10 +467,10 @@ class LWX
             // w3 2.3: check if tag contains ; (reserved for experimental namespaces)
             if (tag_split[0].includes(";"))
                 this.#warning(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
-            
 
+            
             // construct the new node
-            let new_node = {name:tag_split[0], __id:this.#highest_id++}
+            let new_node = {name:this.#preprocess_tag(tag_split[0]), __id:this.#highest_id++}
 
             // 2.10 White Space Handling
             // check for white space declarations
@@ -429,16 +495,22 @@ class LWX
                     }
                 }
             }
-
+            
             // push the new node on only if it is not self_closing
             if (!this.#is_self_closing(tag))
             {
                 this.#nodes.push(new_node)
+                // traverse the tree when a new node is discovered in case the node contains important properties
+                // about reading data in the node (like whitespace)
+                this.#update_tree(null, tag_split)
+            } else {
+                new_node.self_closing = true
+                this.#nodes.push(new_node)
+                this.#update_tree(null, tag_split)
+                this.#nodes.pop()
             }
 
-            // traverse the tree when a new node is discovered in case the node contains important properties
-            // about reading data in the node (like whitespace)
-            this.#update_tree(null, tag_split)
+            
         }
     }
 
@@ -471,6 +543,16 @@ class LWX
         for (var i=0; i<this.#nodes.length; i++)
         {
 
+            // deal with self closing tags first
+            // if (this.#nodes[i].self_closing)
+            // {
+            //     if (!previous[this.#nodes[i].name]) {
+            //         previous[this.#nodes[i].name] = null
+            //     }
+            //     continue;
+            // }
+
+
             // if the branch does not exist, add it
             if (previous[this.#nodes[i].name] === undefined)
             {
@@ -481,8 +563,8 @@ class LWX
             {
                 previous[this.#nodes[i].name].push(construct_new_node(this.#nodes[i]))
             }
-            // if the branch does exist, check if it is a new branch
-            else if (!Array.isArray(previous[this.#nodes[i].name]) && previous[this.#nodes[i].name].__id != this.#nodes[i].__id)
+            // if the branch is null (probably a self closing tag) or it does exist, check if it is a new branch by comparing the __id
+            else if (!previous[this.#nodes[i].name] || (!Array.isArray(previous[this.#nodes[i].name]) && previous[this.#nodes[i].name].__id != this.#nodes[i].__id))
             {
                 // convert object to array and add a new element
                 previous[this.#nodes[i].name] = [previous[this.#nodes[i].name]]
@@ -500,7 +582,7 @@ class LWX
             }
 
             // update any params based on the attributes of the node just entered (white space and such)
-            if (branch.__white_space) this.#white_space = branch.__white_space
+            if (branch && branch.__white_space) this.#white_space = branch.__white_space
 
             // insert any attributes here
             // if it is the last node, replace the default object with the desired data
@@ -510,7 +592,7 @@ class LWX
              * */
             if (i == this.#nodes.length - 1) 
             {
-                if (data && data.trim())
+                if ((data && data.trim()) || this.#nodes[i].self_closing)
                 {
                     // insert any data/new tag data here
                     if (Array.isArray(previous[this.#nodes[i].name]))

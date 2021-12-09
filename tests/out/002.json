@@ -1,5 +1,5 @@
 {
-    "ops:world-patent-data": {
+    "world-patent-data": {
       "exchange-documents": {
         "exchange-document": {
           "abstract": {
@@ -7,5 +7,7 @@
           }
         }
       }
+      ,
+        "meta":null
     }
   }
