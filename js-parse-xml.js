@@ -6,6 +6,8 @@ const es = require('event-stream')
 const LINE_ONLY = "%s\x1b[0m"
 const YELLOW = "\x1b[33m%s\x1b[0m"
 const RED = "\x1b[31m"
+const MAGENTA = "\x1b[35m"
+
 const BLACK = "\x1b[30m"
 //Background colors
 const BGRED = "\x1b[41m"
@@ -18,10 +20,10 @@ const RESET = "\x1b[0m"
 // https://www.w3.org/TR/1998/REC-xml-19980210
 
 function warn(message) {
-    console.warn(BGYELLOW, BLACK, message, RESET)
+    console.warn(BGYELLOW, BLACK, "WARN", RESET, MAGENTA,"js-parse-xml", RESET, message)
 }
 function error(message) {
-    console.error(BGRED, BLACK, message, RESET)
+    console.error(BGRED, BLACK, "ERROR", RESET, MAGENTA,"js-parse-xml", RESET, message)
 }
 
 /**
