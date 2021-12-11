@@ -205,15 +205,6 @@ class LWX
         this.finalize(this.#result)
         return this.#result
     }
-    /**
-     * Prints out a warning to the console
-     * @param {string|number} message - The message to print out
-     */
-    warning(message)
-    {
-        // console.log(chalk.yellow(`${++this.errors}) Warning: ${message}`))
-        console.log(`${++this.#errors}) Warning: ${message}`)
-    }
 
     /**
      * Increments {@link #index} and {@link #token}
@@ -266,7 +257,7 @@ class LWX
             // 2.8 Prolog and Document Type Declaration
             // The document type declaration must appear before the first element in the document.
             if (this.#nodes.length > 0)
-                this.warning("The document type declaration must appear before the first element in the document")
+                warn("The document type declaration must appear before the first element in the document")
             return true
         }
         return false
@@ -461,7 +452,7 @@ class LWX
         {
             // w3 2.2: check if root node is the only node that exists (it should)
             if (this.#nodes.length > 0 && tag_split[0] == this.#nodes[0].name)
-                this.warning(`Root node '${tag_split[0]}' should only appear once.`)
+                warn(`Root node '${tag_split[0]}' should only appear once.`)
 
             
             // split the tag into important parts
@@ -469,7 +460,7 @@ class LWX
 
             // w3 2.3: check if tag contains ; (reserved for experimental namespaces)
             if (tag_split[0].includes(";"))
-                this.warning(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
+                warn(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
 
             
             // construct the new node
@@ -489,14 +480,14 @@ class LWX
                         
                         if (space != this.#default && space != this.#preserve)
                         {
-                            this.warning(`Invalid xml:space value '${space}' found. Valid values are 'default' and 'preserve'.`)
+                            warn(`Invalid xml:space value '${space}' found. Valid values are 'default' and 'preserve'.`)
                         } else
                         {
                             new_node.__white_space = space
                         }
                     } else
                     {
-                        this.warning("Invalid XML markup found for attribute xml:space")
+                        warn("Invalid XML markup found for attribute xml:space")
                     }
                 }
             }
