@@ -43,8 +43,7 @@ await parser.parseFile('absolute file name', {stream:true})
 ## **Output**
 Attributes inside of the tags are ignored for now in the json object. The purpose is to extract content out from the XML. XML attributes are used to extract content, most notability the xml:space attribute. This parser also supports CDATA.
 
-Here is an example output
-XML:
+Input XML:
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <ops:world-patent-data xmlns="http://www.epo.org/exchange" xmlns:ops="http://ops.epo.org" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -58,7 +57,8 @@ XML:
     </exchange-documents>
 </ops:world-patent-data>
 ```
-JSON OUTPUT:
+
+Output JSON:
 ```
 {
   "world-patent-data": {
@@ -82,11 +82,10 @@ let content = json['world-patent-data']['exchange-documents']['abstract']['p']
 
 ## **Contributing**
 ### The Future
-**"Soon" projects**
 Current projects include giving the option to maintain tag attributes in the final json object, and provide support for all possible xml: tag options in accordance with a well-formed xml document. 
 
 We also hope to include more test cases as we develop our own test case suite for XML testing.
-**"Later" projects**
+
 We want to provide a way to parse json back into XML, as well as XML verification through given XML schema.
 
 ### **Overview**
