@@ -99,7 +99,7 @@ You can then make a pull request with the change. This pull request will be revi
 2. PR must have a clear description of why it was changed
 3. All tests must pass with no errors or warnings found (not implemented currently)
 4. All changes must be documents using JSDoc syntax
-5. All JSDocs must be re-made by running ```jsdoc js-parse-xml.js`` with no errors or warnings
+5. All JSDocs must be re-made by running ```jsdoc js-parse-xml.js``` with no errors or warnings
 
 ### **Testing**
 
