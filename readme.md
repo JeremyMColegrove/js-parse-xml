@@ -5,7 +5,7 @@ js-parse-xml was inspired by the need for an extremely lightweight performant XM
 js-parse-xml also has noteable features such as its ability to stream files, which allows for arbitrarily large XML file sizes.
 
 ## **Getting Started**
-Getting started is very easy. Once you have cloned the repo, simply run npm install inside the projects directory. From there, you should be able to use it in all of your projects.
+Simply run ```npm i js-parse-xml``` or ```yarn add js-parse-xml``` and the package can then be use as follows:
 
 ```
 import parser from 'js-parse-xml'
@@ -40,9 +40,55 @@ parser.parseStringSync('string of xml')
 await parser.parseFile('absolute file name', {stream:true})
 ```
 
+## **Output**
+Attributes inside of the tags are ignored for now in the json object. The purpose is to extract content out from the XML. XML attributes are used to extract content, most notability the xml:space attribute. This parser also supports CDATA.
 
+Here is an example output
+XML:
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<ops:world-patent-data xmlns="http://www.epo.org/exchange" xmlns:ops="http://ops.epo.org" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <ops:meta/>
+    <exchange-documents>
+        <exchange-document>
+            <abstract lang="en">
+                <p>The invention relates to an apparatus</p>
+            </abstract>
+        </exchange-document>
+    </exchange-documents>
+</ops:world-patent-data>
+```
+JSON OUTPUT:
+```
+{
+  "world-patent-data": {
+    "exchange-documents": {
+      "exchange-document": {
+        "abstract": {
+          "p": "The invention relates to an apparatus"
+        }
+      }
+    },
+    "meta":null
+  }
+}
+```
+
+If you are trying to access the content of the "p" tag, you can simply access like you would a normal object
+
+```
+let content = json['world-patent-data']['exchange-documents']['abstract']['p']
+```
 
 ## **Contributing**
+### The Future
+**"Soon" projects**
+Current projects include giving the option to maintain tag attributes in the final json object, and provide support for all possible xml: tag options in accordance with a well-formed xml document. 
+
+We also hope to include more test cases as we develop our own test case suite for XML testing.
+**"Later" projects**
+We want to provide a way to parse json back into XML, as well as XML verification through given XML schema.
+
 ### **Overview**
 The goal of this project is to be open source and community driven. Therefore contributing is welcomed, and any/all ideas and suggestions are taken into consideration. 
 

@@ -1,7 +1,21 @@
 {
   "name": "js-parse-xml",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "lightweight Node-JS xml parser",
+  "author": {
+    "name":"Jeremy Colegrove",
+    "email": "jeremycolegrove2012@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JeremyMColegrove/js-parse-xml"
+  },
+  "keywords": ["xml", "parser", "fast", "lightweight", "synchronous", "async", "quick"],
+  "license": "ISC",
+  "bugs": {
+    "url" : "https://github.com/JeremyMColegrove/js-parse-xml/issues",
+    "email" : "jeremycolegrove2012@gmail.com"
+  },
   "main": "js-parse-xml.js",
   "scripts": {
     "doc": "jsdoc -c ./jsdoc.json",
@@ -12,8 +26,7 @@
     "js-parse-xml.js",
     "readme.md"
   ],
-  "author": "Jeremy Colegrove",
-  "license": "ISC",
+
   "devDependencies": {
     "@types/jest": "^27.0.3"
   },

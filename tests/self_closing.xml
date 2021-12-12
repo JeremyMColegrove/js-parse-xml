@@ -1,7 +1,7 @@
 <test>
     <tag1/>
-        <tag1>
-            content
-        </tag>
+    <tag1>
+        content
+    </tag>
     <tag1/>
 </test>
