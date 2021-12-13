@@ -1,4 +1,10 @@
 ## **Description**
+### **Update Dec 13th: We recommend upgrading to version 2.0 as soon as possible**
+**Whats new**
+1. Improved speed performance by ~200%
+2. Fixed issue involving escaped XML characters
+3. Fixed issue involving potentially conflicting internal and XML keys
+
 js-parse-xml was inspired by the need for an extremely lightweight performant XML parser. XML is part of every day business life and therefore extremely important to get right. To make sure js-parse-xml adheres to industry standards, the standard authority for XML structure is being used [REC-xml-19980210](https://www.w3.org/TR/1998/REC-xml-19980210)
 
 ## **Features**
@@ -42,10 +48,11 @@ await parser.parseFile('file name', {stream:true})
 
 
 ## **Performance**
+These tests were ran on version 1.2.1
 
 Mac M1 Air: ~21 MB/s
 
-This XML parser is about 98% as fast as the popular fast-xml-parser, but at 20% of the library size.
+This XML parser is about 99% as fast as the popular fast-xml-parser, but at 20% of the library size.
 
 Unlike most other parsers, js-parse-xml does not use any external data structures to keep track of data while parsing. It constructs the final result as it is parsing. Not only that, but it can stream files, so the only limit to the size of files you can parse is the size of the final result object.
 
@@ -88,7 +95,6 @@ If you are trying to access the content of the "p" tag, you can simply access li
 ```
 let content = json['world-patent-data']['exchange-documents']['abstract']['p']
 ```
-]
 
 
 ## **Contributing**

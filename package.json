@@ -1,6 +1,6 @@
 {
   "name": "js-parse-xml",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "lightweight Node-JS xml parser",
   "author": {
     "name": "Jeremy Colegrove",
@@ -40,7 +40,6 @@
     "@types/jest": "^27.0.3"
   },
   "dependencies": {
-    "event-stream": "^4.0.1",
-    "fast-xml-parser": "^4.0.0-beta.8"
+    "event-stream": "^4.0.1"
   }
 }
