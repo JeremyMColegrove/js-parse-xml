@@ -22,13 +22,13 @@ js-parse-xml has 4 parsing options -- two asynchronous, and two synchronous.
 let parser = require('js-parse-xml')
 
 // parse a file asynchronously
-await parser.parseFile('absolute file path')
+await parser.parseFile('file path')
 
 // parse string asynchronously
 await parser.parseString('string of xml')
 
 // parse a file synchronously
-parser.parseFileSync('absolute file path')
+parser.parseFileSync('file path')
 
 // parse a string synchronously
 parser.parseStringSync('string of xml')
@@ -37,11 +37,20 @@ parser.parseStringSync('string of xml')
 
 // alternatively if you have a large file you want to read in using streams, you can pass it as an option to parseFile like so
 // NOTE: streaming files is only available with asynchronous parseFile function
-await parser.parseFile('absolute file name', {stream:true})
+await parser.parseFile('file name', {stream:true})
 ```
 
+
+## **Performance**
+
+Mac M1 Air: ~21 MB/s
+
+This XML parser is about 98% as fast as the popular fast-xml-parser, but at 20% of the library size.
+
+Unlike most other parsers, js-parse-xml does not use any external data structures to keep track of data while parsing. It constructs the final result as it is parsing. Not only that, but it can stream files, so the only limit to the size of files you can parse is the size of the final result object.
+
 ## **Output**
-Attributes inside of the tags are ignored for now in the json object. The purpose is to extract content out from the XML. XML attributes are used to extract content, most notability the xml:space attribute. This parser also supports CDATA.
+XML attributes are used to format the final content, most notability the xml:space attribute. This parser also supports CDATA. It removes the namespaces from the tag names.
 
 Input XML:
 ```
@@ -51,7 +60,7 @@ Input XML:
     <exchange-documents>
         <exchange-document>
             <abstract lang="en">
-                <p>The invention relates to an apparatus</p>
+                <p><![CDATA[<xml>]]></p>
             </abstract>
         </exchange-document>
     </exchange-documents>
@@ -65,11 +74,11 @@ Output JSON:
     "exchange-documents": {
       "exchange-document": {
         "abstract": {
-          "p": "The invention relates to an apparatus"
+          "p": "<xml>"
         }
       }
     },
-    "meta":null
+    "meta":{}
   }
 }
 ```
@@ -79,6 +88,8 @@ If you are trying to access the content of the "p" tag, you can simply access li
 ```
 let content = json['world-patent-data']['exchange-documents']['abstract']['p']
 ```
+]
+
 
 ## **Contributing**
 ### The Future

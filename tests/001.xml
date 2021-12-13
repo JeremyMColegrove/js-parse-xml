@@ -1,3 +1,16 @@
+<?xml version='1.0' ?>
+<!DOCTYPE datasets SYSTEM "http://www.cs.washington.edu/research/projects/xmltk/xmldata/data/nasa/dataset_053.dtd">
 <person>
-    <name>Sam</name>
+    <name>
+    <!-- This is a comment -->
+        Sam
+    </name>
+    <name>
+        <f>1
+        </f>
+        <f>2
+        </f>
+        <f>3
+        </f>
+    </name>
 </person>

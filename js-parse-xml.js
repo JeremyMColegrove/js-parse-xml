@@ -2,7 +2,6 @@
 const fs = require('fs')
 const es = require('event-stream')
 
-
 const LINE_ONLY = "%s\x1b[0m"
 const YELLOW = "\x1b[33m%s\x1b[0m"
 const RED = "\x1b[31m"
@@ -32,11 +31,11 @@ function error(message) {
  * @param {Object} options XML parsing options
  * @returns {Object}
  */
-function parseFileSync(filename, options={})
+function parseFileSync(filename, options={debug:true})
 {
     if (options.stream) warn("js-parse-xml warning: flag 'stream' will be ignored by synchronous call. Use parseFile() to stream file.")
     
-    let lwx_parser = new LWX()
+    let lwx_parser = new LWX(options)
     let data = fs.readFileSync(filename, 'utf-8')
     lwx_parser.parse_line(data)
     return lwx_parser.get_result()
@@ -48,9 +47,9 @@ function parseFileSync(filename, options={})
  * @param {Object} options XML parsing options
  * @returns {Object}
  */
-function parseStringSync(xml, options={})
+function parseStringSync(xml, options={debug:true})
 {
-    let lwx_parser = new LWX()
+    let lwx_parser = new LWX(options)
     lwx_parser.parse_line(xml)
     return lwx_parser.get_result()
 }
@@ -61,7 +60,7 @@ function parseStringSync(xml, options={})
  * @param {Object} options XML parsing options
  * @returns {Promise}
  */
-async function parseString(xml, options={})
+async function parseString(xml, options={debug:true})
 {
     return new Promise((resolve, reject)=> {
         return resolve(parseStringSync(xml, options))
@@ -74,7 +73,7 @@ async function parseString(xml, options={})
  * @param {Object} options XML parsing options
  * @returns {Promise}
  */
-async function parseFile(filename, options={})
+async function parseFile(filename, options={debug:true})
 {
     return new Promise((resolve, reject)=> {
 
@@ -83,12 +82,11 @@ async function parseFile(filename, options={})
         }
 
 
-        let lwx_parser = new LWX()
+        let lwx_parser = new LWX(options)
         // stream the file
         fs.createReadStream(filename, 'utf8')
         .on('data', (chunk)=> {
-            // in case it reads in the chunk as a buffer
-            if (chunk instanceof Buffer) chunk = chunk.toString('utf8')
+            // @ts-ignore
             lwx_parser.parse_line(chunk)
         })
         .on('end', ()=>{
@@ -108,34 +106,32 @@ async function parseFile(filename, options={})
 
 class LWX 
 {
+    #tree
     #token
     #index
-    #result
-    #nodes
-    #highest_id
     #data
-    #start_tag
-    #end_tag
-    #preserve
-    #default
-    #white_space
-    #in_comment
-    #errors
-
-    constructor() 
+    #debug
+    #tag
+    #in_tag
+    #cdata
+    #in_cdata
+    #attributes
+    constructor(options) 
     {
         /**
+         * @property {Object} tree the json representation of the xml
          * @property {string} token current token it is parsing
          * @property {number} index current index it is parsing
          * @property {Object} result final object tree
-         * @property {Array<Node>} nodes Array of the current path through the tree
+         * @property {Object} current_node
          * @property {number} highest_id An ID that each new node receives so we can keep track of duplicates
          * @property {string} data A buffer to store XML data split across multiple lines
-         * @property {number} start_tag Stores the index of the starting tag
-         * @property {number} end_tag Stores the index of the end tag
          * @property {boolean} in_comment Stores whether or not we are currently parsing a comment
-         * 
+         * @property {string} tag Stores the current tag it is parsing
          */
+
+        // set flags here for our options
+        this.#debug = options.debug
 
         this.reset_parser()
     }
@@ -145,67 +141,29 @@ class LWX
      */
     reset_parser()
     {
+        this.#tree = null
+
         this.#token = ''
 
         this.#index = -1
 
-        this.#result = {}
-
-        this.#nodes = []
-
-        this.#highest_id = 0
 
         this.#data = ""
 
-        this.#start_tag = 0
+        this.#tag = ""
 
-        this.#end_tag = 0
+        this.#cdata = ""
 
-        this.#preserve = "preserve"
+        this.#in_cdata = false
 
-        this.#default = "default"
+        this.#in_tag = false
 
-        this.#white_space = this.#default
-
-        this.#in_comment = false
-
-        this.#errors = 0
-    }
-
-    /**
-     * Removes all built in metadata used while constructing the object (all __id keys)
-     * @param {Object} obj 
-     */
-    finalize(obj)
-    {
-        let key = "__id"
-
-        for(var prop in obj) 
-        {
-            if (prop === key)
-            delete obj[prop];
-            else if (typeof obj[prop] === 'object')
-            this.finalize(obj[prop]);
-        }
-
-        if(Array.isArray(obj))
-        {
-            obj.forEach(item => {
-              this.finalize(item)
-            });
-        }
-        else if(typeof obj === 'object' && obj != null)
-        {
-            Object.getOwnPropertyNames(obj).forEach(item=> {
-                if(item == key) delete obj[key];
-                else this.finalize(obj[item]);
-            });
-        }
+        this.#attributes = {}
     }
 
     get_result() {
-        this.finalize(this.#result)
-        return this.#result
+        delete this.#tree.root
+        return this.#tree
     }
 
     /**
@@ -242,6 +200,7 @@ class LWX
      */
     is_self_closing(tag)
     {
+        if (!tag) return false
         if (tag.charAt(tag.length - 1) == "/") return true
         return false
     }
@@ -258,8 +217,8 @@ class LWX
         {
             // 2.8 Prolog and Document Type Declaration
             // The document type declaration must appear before the first element in the document.
-            if (this.#nodes.length > 0)
-                warn("The document type declaration must appear before the first element in the document")
+            // if (this.#nodes.length > 0)
+            //     warn("The document type declaration must appear before the first element in the document")
             return true
         }
         return false
@@ -267,65 +226,48 @@ class LWX
 
     /**
      * Checks if given tag is a CDATA tag
-     * @param {string} xml - XML string
+     * @param {string} tag - XML tag
      * @returns {boolean}
      */
-    is_cdata_tag(xml)
+    is_cdata_tag(tag)
     {
-        let cdata_tag = xml.substring(this.#start_tag, this.#start_tag + 9)
-        if (cdata_tag == "<![CDATA[") return true
-        return false
+        return tag.startsWith("![CDATA[")
     }
 
+    
     /**
-     * Checks if given tag is a comment tag
-     * @param {string} xml - XML string
-     * @returns {boolean}
-     */
-    is_comment_tag(xml)
-    {
-        let comment_tag = xml.substring(this.#start_tag, this.#start_tag + 4)
-        if (comment_tag == "<!--") return true
-        return false
-    }
-
-    /**
-     * Extracts the CDATA from a given CDATA tag
-     * Will eat the XML until it finds closing tags
-     * @param {string} xml - The XML we are parsing
-     */
+         * Extracts the CDATA from a given CDATA tag
+         * Will eat the XML until it finds closing tags
+         */
     extract_cdata(xml)
     {
-        // get all of the CDATA string
-        let cdata = ""
-        // read forward until ]]> tag is found
-        while (this.eat_char(xml) && !cdata.endsWith("]]>"))
-        {
-            cdata += this.#token
+        this.#in_cdata = true
+        while (this.eat_char(xml)) {       
+            this.#cdata += this.#token
+
+            if (this.#cdata.endsWith("]]>")) {
+                this.#in_cdata = false
+                this.#data += this.#cdata.substring(0, this.#cdata.length - 3)
+                this.#cdata = ""
+                this.#tag = ""
+                break
+                
+            }
         }
-
-        // start both the end and start tag from the same place
-        this.#end_tag = this.#index
-        this.#start_tag = this.#index
-        // extract the cdata from the string
-        cdata = cdata.substring(8, cdata.length - 3)
-
-        if (this.#white_space == this.#default) 
-            cdata = cdata.trim()
-
         
-        this.#data += cdata
+    }
+    /**
+     * Checks if given tag is a comment tag
+     * @param {string} tag - the tag to check
+     * @returns {boolean}
+     */
+    is_comment_tag(tag)
+    {
+        if (tag.charAt(0) == "!" && tag.charAt(1) == "-" && tag.charAt(2) == "-") return true
+        return false
     }
 
-    /**
-     * Data split up on multiple lines gets processed correctly, but tags split on differnet lines do not
-     * TODO: allow for tags to be split on multiple lines
-     * Example -- if the parser were to read this in, it should handle it correctly
-     *      lineNr      Text
-     *      1.          <patie
-     *      2.          nce > test </pat
-     *      3.          ience>
-     */
+    
 
     /**
      * Parses a line of XML
@@ -335,83 +277,74 @@ class LWX
     parse_line(xml)
     {
         this.#index = -1
-        this.#end_tag = -1
-        this.#start_tag = -1
         // go through all of the characters
-        while (this.eat_char(xml))
+        
+        if (this.#in_cdata)
         {
-            // if we find the start of a tag
-            if (this.#token == "<")
-            {
-
-                this.#start_tag = this.#index
-
-                // w3 2.7 CDATA <![CDATA[<greeting></greeting>]]> should be treated as data not XML
-                // look for <![CDATA[ start tag
-                
-                if (this.is_cdata_tag(xml))
-                {
-                    this.extract_cdata(xml)   
-                }
-                
-                // try and get the data between end and start tags (if any)
-                else if (this.#start_tag > 0)
-                {
-                    if (this.is_comment_tag(xml))
-                    {
-                        //this will ignore all tags and data until > is found
-                        this.#in_comment = true
-                    }
-                    let new_data = xml.substring(this.#end_tag+1, this.#start_tag)
-                    if (this.#white_space == this.#default)
-                    {
-                        new_data = new_data.trim()
-                    }
-                    this.#data += new_data
-                    
-                }
-            }
-            // if we reach the end of the comment
-            else if (this.#token == ">" && this.#in_comment)
-            {
-                this.#end_tag = this.#index
-                this.#in_comment = false
-            }
-            // if we find the end of a tag
-            else if (this.#token == ">" && !this.#in_comment)
-            {
-                
-                // try and parse the tag with the information in it
-                this.#end_tag = this.#index
-                let tag = xml.substring(this.#start_tag+1, this.#end_tag)
-                if (tag.trim())
-                {   
-
-                    if (!this.is_param_tag(tag))
-                    {
-                        this.parse_tag(tag, this.#data)
-                        // clear all of the data
-                        this.#data = ""
-                    } 
-                }
-                //now reset the start tag
-                this.#start_tag = this.#end_tag
-            }
+            this.extract_cdata(xml)
         }
 
-        // if there is some data on another line, append to our buffer
-        if (this.#end_tag != this.#index && !this.#in_comment)
+        while (this.eat_char(xml))
         {
-            // append data
-            let new_data = xml.substring(this.#end_tag+1, this.#index)
-            if (this.#white_space == this.#default)
+            
+
+            if (this.#token == "<") 
             {
-                new_data = new_data.trim()
+                // we must add any data that we have
+                this.#in_tag = true
+                continue
             }
-            this.#data += new_data
+            else if (this.#token == ">" && this.#in_tag) 
+            {
+                this.handle_tag(this.#tag)
+                this.#in_tag = false
+                continue
+            }
+
+            // if we are in a tag, append to tag
+            if (this.#in_tag)
+            {
+                this.#tag += this.#token
+
+                // check to see if we are building a CDATA tag
+                if (this.is_cdata_tag(this.#tag))
+                {
+                    this.extract_cdata(xml)
+                }
+            } 
+            // otherwise we are appending data
+            else 
+            {
+                // must be some data, so add it to the data
+                this.#data += this.#token
+            }
         }
     }
 
+
+    handle_tag(tag)
+    {
+        if (!tag) return
+
+        if (this.is_comment_tag(tag))
+        {
+            // console.log("Comment found", tag)
+        } 
+        else if (this.is_cdata_tag(tag))
+        {   
+            this.extract_cdata(tag)
+        } 
+        else if (this.is_param_tag(tag)) 
+        {
+            // console.log("Param tag found", tag)
+        } 
+        else 
+        {
+            this.parse_tag(tag)
+        }
+        // the tag is parsed, reset it
+        this.#tag = ""
+    }
     /**
      * 
      * @param {string} tag The tag to pre-process 
@@ -419,15 +352,22 @@ class LWX
      */
     preprocess_tag(tag) {
         // tags will not have any / in them. this is a basic rule of xml, and also removes / from self closing tags
-        // @ts-ignore
+        tag = tag.trim()
 
-        const searchRegExp = /\//g;
-        const replaceWith = '';
-        tag = tag.replace(searchRegExp, replaceWith);
+        if (tag.charAt(0) == "/")
+        {
+            tag = tag.substring(1)
+        }
+
+        if (tag.charAt(tag.length - 1) == "/")
+        {
+            tag = tag.substring(0, tag.length - 1)
+        }
+
 
         // also split any namespaces from the tag
         let tag_split = tag.split(":")
-        tag = tag_split[tag_split.length-1]
+        tag = tag_split.pop()
 
         return tag
     }
@@ -436,174 +376,158 @@ class LWX
     /**
      * Takes a tag and parses it, and adds it into the {@link #result} object
      * @param {string} tag 
-     * @param {string|void} data 
      */
-    parse_tag(tag, data)
+    parse_tag(tag)
     {
         // split the tag up into its important parts
-        let tag_split = tag.split(/[= ]/)
+        var tag_split = tag.split(/[= ]/)
 
         if (this.is_end_tag(tag))
         {
-            // we have an end tag, add the data and all branches
-            this.update_tree(data)
-            // remove the last node from the tree
-            this.#nodes.pop()
+            // back up the tree
+            if (this.#data.trim())
+                this.add_content(this.#data)
+
+            this.#data = ""
+            this.navigate_outside()
         }
         else
         {
+            // if it is a start tag, disregard any data that we read previously
+            this.#data = ""
+
             // w3 2.2: check if root node is the only node that exists (it should)
-            if (this.#nodes.length > 0 && tag_split[0] == this.#nodes[0].name)
-                warn(`Root node '${tag_split[0]}' should only appear once.`)
+            // if (this.#nodes.length > 0 && tag_split[0] == this.#nodes[0].name)
+            //     warn(`Root node '${tag_split[0]}' should only appear once.`)
 
             
             // split the tag into important parts
-
-
             // w3 2.3: check if tag contains ; (reserved for experimental namespaces)
-            if (tag_split[0].includes(";"))
+            if (this.#debug && tag_split[0].includes(";"))
                 warn(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
 
             
-            // construct the new node
-            let new_node = {name:this.preprocess_tag(tag_split[0]), __id:this.#highest_id++}
+            // construct a new default node
+            let node = {}
+            let name = this.preprocess_tag(tag_split[0])
+            node[name] = {}
+            // use an invalid key for internal use so it will not conflict
+            node["<name>"] = name
+            node['<attributes>'] = {}
 
-            // 2.10 White Space Handling
-            // check for white space declarations
-            for (var i=1; i<tag_split.length; i++)
+            // collect all attributes -- skip 1 for the tag name
+            for (var i=1; i<tag_split.length && i<tag_split.length-1; i+=2)
             {
-                if (tag_split[i] == "xml:space")
-                {
-                    if (i < tag_split.length-1)
-                    {
-                        const searchRegExp = /\"/g;
-                        const replaceWith = '';
-                        let space = tag_split[i+1].replace(searchRegExp, replaceWith);
-                        
-                        if (space != this.#default && space != this.#preserve)
-                        {
-                            warn(`Invalid xml:space value '${space}' found. Valid values are 'default' and 'preserve'.`)
-                        } else
-                        {
-                            new_node.__white_space = space
-                        }
-                    } else
-                    {
-                        warn("Invalid XML markup found for attribute xml:space")
-                    }
-                }
+                var value = tag_split[i+1].substring(1, tag_split[i+1].length - 1)
+
+                // add any attributes into the global attributes array
+                this.#attributes[tag_split[i]] = value
+                // also add it into local
+                node['<attributes>'][tag_split[i]] = value
             }
-            
+
+
+
             // push the new node on only if it is not self_closing
-            if (!this.is_self_closing(tag))
-            {
-                this.#nodes.push(new_node)
-                // traverse the tree when a new node is discovered in case the node contains important properties
-                // about reading data in the node (like whitespace)
-                this.update_tree(null, tag_split)
-            } else {
-                new_node.self_closing = true
-                this.#nodes.push(new_node)
-                this.update_tree(null, tag_split)
-                this.#nodes.pop()
-            }
+            this.navigate_inside(node)
 
-            
+            if (this.is_self_closing(tag))
+            {
+                this.add_content({})
+                this.navigate_outside()
+            }
         }
     }
 
-    /**
-     * Updates the tree using the path from {@link #nodes}, and insert data if needed
-     * @param {string|void} [data] Data inside of tags
-     * @param {Array} [attributes] Tag attributes
-     */
-    update_tree(data=null, attributes=null)
+    navigate_root()
     {
-        // takes in the tree node and the parent and will construct object for result tree
-        function construct_new_node(node)
+        while (!this.#tree.root)
         {
-            let result = {}
-            result.__id = node.__id
+            this.navigate_outside()
+        }
+    }
 
-            // add in all relevant information into the final tree here
-            if (node.__white_space) result.__white_space = node.__white_space
-            return result
+    navigate_inside(node)
+    {
+        node.parent = this.#tree
+
+        // copy all of the local data into the global data
+        this.#attributes = Object.assign({}, node['<attributes>'], this.#attributes)
+
+
+        if (!this.#tree) {
+            node.parent = node
+            node.root = true
+            return this.#tree = node
         }
 
 
-        // reset any parser params here (like whitespace attribute)
-        this.#white_space = this.#default
+        if (this.#tree[this.#tree["<name>"]][node["<name>"]] && !Array.isArray(this.#tree[this.#tree["<name>"]][node["<name>"]]))
+            this.#tree[this.#tree["<name>"]][node["<name>"]] = [this.#tree[this.#tree["<name>"]][node["<name>"]]]
 
-        let previous = this.#result
-
-        let branch
-
-        for (var i=0; i<this.#nodes.length; i++)
+        if (Array.isArray(this.#tree[this.#tree["<name>"]][node["<name>"]]))
         {
+            this.#tree[this.#tree["<name>"]][node["<name>"]].push(node[node["<name>"]])
+        }
+        else
+        {
+            this.#tree[this.#tree["<name>"]][node["<name>"]] = node[node["<name>"]]
+        }
 
-            // deal with self closing tags first
-            // if (this.#nodes[i].self_closing)
-            // {
-            //     if (!previous[this.#nodes[i].name]) {
-            //         previous[this.#nodes[i].name] = null
-            //     }
-            //     continue;
-            // }
+        this.#tree = node
+    }
 
+    process_content(content)
+    {
+        if (Object.prototype.toString.call(content) === "[object String]")
+        {
+            // first apply any attributes on the string
 
-            // if the branch does not exist, add it
-            if (previous[this.#nodes[i].name] === undefined)
-            {
-                // add the branch as an empty object
-                previous[this.#nodes[i].name] = construct_new_node(this.#nodes[i])
-            } 
-            else if (Array.isArray(previous[this.#nodes[i].name]) && previous[this.#nodes[i].name][previous[this.#nodes[i].name].length-1].__id != this.#nodes[i].__id)
-            {
-                previous[this.#nodes[i].name].push(construct_new_node(this.#nodes[i]))
-            }
-            // if the branch is null (probably a self closing tag) or it does exist, check if it is a new branch by comparing the __id
-            else if (!previous[this.#nodes[i].name] || (!Array.isArray(previous[this.#nodes[i].name]) && previous[this.#nodes[i].name].__id != this.#nodes[i].__id))
-            {
-                // convert object to array and add a new element
-                previous[this.#nodes[i].name] = [previous[this.#nodes[i].name]]
-                previous[this.#nodes[i].name].push(construct_new_node(this.#nodes[i]))
-            }
+            if (this.#attributes['xml:space'] != "preserve") content = content.trim()
             
-            // if it is an array
-            if (Array.isArray(previous[this.#nodes[i].name]))
-            {
-                // get the last element
-                branch = previous[this.#nodes[i].name][previous[this.#nodes[i].name].length - 1]
-            } else {
-                // just access the element
-                branch = previous[this.#nodes[i].name]
-            }
+            // convert attribute into numerical values?
 
-            // update any params based on the attributes of the node just entered (white space and such)
-            if (branch && branch.__white_space) this.#white_space = branch.__white_space
-
-            // insert any attributes here
-            // if it is the last node, replace the default object with the desired data
-            /***
-             * TODO use the attributes to insert attributes followed by @ sign in the node.
-             * ISSUE how do we handle a tag with both an attribute and data? ignore the attribute?
-             * */
-            if (i == this.#nodes.length - 1) 
-            {
-                if ((data && data.trim()) || this.#nodes[i].self_closing)
-                {
-                    // insert any data/new tag data here
-                    if (Array.isArray(previous[this.#nodes[i].name]))
-                    {
-                        previous[this.#nodes[i].name] [previous[this.#nodes[i].name].length - 1] = data
-                    } else
-                    {
-                        previous[this.#nodes[i].name] = data
-                    }         
-                }
-            }
-            previous = branch
+            return content
         }
+        return content
+    }
+
+    add_content(content)
+    {
+
+        content = this.process_content(content)
+        // if the child is an array
+        if (Array.isArray(this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]]))
+        {
+            this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]].pop()
+            this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]].push(content)
+        } else {
+            //check if circular root obj
+            if (this.#tree.root)
+            {
+                this.#tree[this.#tree["<name>"]] = content
+            } else {
+                this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]] = content
+            }
+        }
+    }
+
+    navigate_outside()
+    {   
+
+
+
+        // navigate outside and clean up any internal variables used
+        delete this.#tree['<name>']
+        delete this.#tree['<attributes>']
+
+
+        let temp = this.#tree.parent
+        delete this.#tree.parent
+        this.#tree = temp
+
+        // update our gobal attributes to our local attributes
+        this.#attributes = Object.assign({}, this.#tree['<attributes>'])
     }
 }
 
