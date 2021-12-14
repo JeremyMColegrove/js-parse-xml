@@ -1,6 +1,6 @@
 {
   "name": "js-parse-xml",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "lightweight Node-JS xml parser",
   "author": {
     "name": "Jeremy Colegrove",
