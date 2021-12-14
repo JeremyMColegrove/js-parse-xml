@@ -38,8 +38,5 @@
   ],
   "devDependencies": {
     "@types/jest": "^27.0.3"
-  },
-  "dependencies": {
-    "event-stream": "^4.0.1"
   }
 }

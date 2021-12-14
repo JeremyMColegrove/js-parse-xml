@@ -1,6 +1,6 @@
 // @ts-check
 const fs = require('fs')
-const es = require('event-stream')
+// const es = require('event-stream')
 
 const LINE_ONLY = "%s\x1b[0m"
 const YELLOW = "\x1b[33m%s\x1b[0m"

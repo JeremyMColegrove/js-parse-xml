@@ -8,7 +8,11 @@
 js-parse-xml was inspired by the need for an extremely lightweight performant XML parser. XML is part of every day business life and therefore extremely important to get right. To make sure js-parse-xml adheres to industry standards, the standard authority for XML structure is being used [REC-xml-19980210](https://www.w3.org/TR/1998/REC-xml-19980210)
 
 ## **Features**
-js-parse-xml also has noteable features such as its ability to stream files, which allows for arbitrarily large XML file sizes.
+
+1. Supports file streaming
+2. 0 dependencies
+3. Small package size (~20KB)
+4. Fast parsing (~21 MB/s)
 
 ## **Getting Started**
 Simply run ```npm i js-parse-xml``` or ```yarn add js-parse-xml``` and the package can then be use as follows:
