@@ -26,22 +26,30 @@ js-parse-xml has 4 parsing options -- two asynchronous, and two synchronous.
 let parser = require('js-parse-xml')
 
 // parse a file asynchronously
-await parser.parseFile('file path')
+var content = await parser.parseFile('file path', options?)
 
 // parse string asynchronously
-await parser.parseString('string of xml')
+var content = await parser.parseString('string of xml', options?)
 
 // parse a file synchronously
-parser.parseFileSync('file path')
+var content = parser.parseFileSync('file path', options?)
 
 // parse a string synchronously
-parser.parseStringSync('string of xml')
+var content = parser.parseStringSync('string of xml', options?)
+```
 
+There are also options that you can pass to the parser to modify the way it should behave. The default available options are:
 
-
-// alternatively if you have a large file you want to read in using streams, you can pass it as an option to parseFile like so
-// NOTE: streaming files is only available with asynchronous parseFile function
-await parser.parseFile('file name', {stream:true})
+```
+// the default and available options are as follows
+{
+    encoding:'utf8',            // the encoding to use for files
+    stream:false,               // to stream the files (for large files) (only available for async)
+    preserve_whitespace:false,  // preserve whitespace in content
+    convert_values:true,        // convert tag content to numbers if possible
+    debug:true,                 // show / hide warnings while parsing
+    benchmark:false             // prints the time it takes to parse
+}
 ```
 
 
@@ -53,6 +61,7 @@ Mac M1 Air: ~21 MB/s
 This XML parser is about 99% as fast as the popular fast-xml-parser, but at 20% of the library size.
 
 Unlike most other parsers, js-parse-xml does not use any external data structures to keep track of data while parsing. It constructs the final result as it is parsing. Not only that, but it can stream files, so the only limit to the size of files you can parse is the size of the final result object.
+
 
 ## **Output**
 XML attributes are used to format the final content, most notability the xml:space attribute. This parser also supports CDATA. It removes the namespaces from the tag names.
