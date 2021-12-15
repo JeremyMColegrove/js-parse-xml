@@ -32,8 +32,6 @@
   },
   "files": [
     "js-parse-xml.js",
-    "node-to-json.js",
-    "xml_node.js",
     "readme.md"
   ],
   "devDependencies": {

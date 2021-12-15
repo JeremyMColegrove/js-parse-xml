@@ -1,6 +1,8 @@
-// @ts-check
 const fs = require('fs')
-// const es = require('event-stream')
+
+//for node based parsing, somewhat faster and less code but more memory usage...bad for large files
+// const XMLNode = require('./experimental/xml_node')
+// const convert = require('./experimental/nodes_to_json')
 
 const LINE_ONLY = "%s\x1b[0m"
 const YELLOW = "\x1b[33m%s\x1b[0m"
@@ -21,18 +23,29 @@ const RESET = "\x1b[0m"
 function warn(message) {
     console.warn(BGYELLOW, BLACK, "WARN", RESET, MAGENTA,"js-parse-xml", RESET, message)
 }
+
 function error(message) {
     console.error(BGRED, BLACK, "ERROR", RESET, MAGENTA,"js-parse-xml", RESET, message)
 }
 
+// the default options for parsing the XML
+let default_options = {
+    encoding:'utf8',
+    stream:false,
+    preserve_whitespace:false,
+    convert_values:true,
+    debug:true,
+    benchmark:false
+}
 /**
  * 
  * @param {string} filename Relative or absolute path to XML file.
  * @param {Object} options XML parsing options
  * @returns {Object}
  */
-function parseFileSync(filename, options={debug:true})
+function parseFileSync(filename, options=default_options)
 {
+    options = Object.assign({}, default_options, options)
     if (options.stream) warn("js-parse-xml warning: flag 'stream' will be ignored by synchronous call. Use parseFile() to stream file.")
     
     let lwx_parser = new LWX(options)
@@ -47,8 +60,10 @@ function parseFileSync(filename, options={debug:true})
  * @param {Object} options XML parsing options
  * @returns {Object}
  */
-function parseStringSync(xml, options={debug:true})
+function parseStringSync(xml, options=default_options)
 {
+    options = Object.assign({}, default_options, options)
+
     let lwx_parser = new LWX(options)
     lwx_parser.parse_line(xml)
     return lwx_parser.get_result()
@@ -60,7 +75,7 @@ function parseStringSync(xml, options={debug:true})
  * @param {Object} options XML parsing options
  * @returns {Promise}
  */
-async function parseString(xml, options={debug:true})
+async function parseString(xml, options=default_options)
 {
     return new Promise((resolve, reject)=> {
         return resolve(parseStringSync(xml, options))
@@ -73,7 +88,7 @@ async function parseString(xml, options={debug:true})
  * @param {Object} options XML parsing options
  * @returns {Promise}
  */
-async function parseFile(filename, options={debug:true})
+async function parseFile(filename, options=default_options)
 {
     return new Promise((resolve, reject)=> {
 
@@ -81,10 +96,11 @@ async function parseFile(filename, options={debug:true})
             return resolve(parseFileSync(filename, options))
         }
 
+        options = Object.assign({}, default_options, options)
 
         let lwx_parser = new LWX(options)
         // stream the file
-        fs.createReadStream(filename, 'utf8')
+        fs.createReadStream(filename, {encoding:options.encoding})
         .on('data', (chunk)=> {
             // @ts-ignore
             lwx_parser.parse_line(chunk)
@@ -99,10 +115,6 @@ async function parseFile(filename, options={debug:true})
 
     })
 }
-/**
- * LWX class
- * 
- */
 
 class LWX 
 {
@@ -110,12 +122,13 @@ class LWX
     #token
     #index
     #data
-    #debug
     #tag
     #in_tag
     #cdata
     #in_cdata
     #attributes
+    #options
+    #root
     constructor(options) 
     {
         /**
@@ -131,9 +144,11 @@ class LWX
          */
 
         // set flags here for our options
-        this.#debug = options.debug
-
+        this.#options = options   
         this.reset_parser()
+
+        if (this.#options.benchmark)
+            console.time("benchmark")
     }
 
     /**
@@ -162,8 +177,15 @@ class LWX
     }
 
     get_result() {
-        delete this.#tree.root
-        return this.#tree
+        // remove any temporary variables
+        this.#tree?delete this.#tree["@root"]:null
+        this.#tree?delete this.#tree["@name"]:null
+        this.#tree?delete this.#tree["@attributes"]:null
+
+        if (this.#options.benchmark)
+            console.timeEnd("benchmark")
+
+        return this.#tree//convert(this.#tree)
     }
 
     /**
@@ -217,8 +239,8 @@ class LWX
         {
             // 2.8 Prolog and Document Type Declaration
             // The document type declaration must appear before the first element in the document.
-            // if (this.#nodes.length > 0)
-            //     warn("The document type declaration must appear before the first element in the document")
+            if (this.#root)
+                warn("The document type declaration must appear before the first element in the document")
             return true
         }
         return false
@@ -278,7 +300,8 @@ class LWX
     {
         this.#index = -1
         // go through all of the characters
-        
+
+
         if (this.#in_cdata)
         {
             this.extract_cdata(xml)
@@ -319,6 +342,7 @@ class LWX
                 this.#data += this.#token
             }
         }
+
     }
 
 
@@ -364,8 +388,6 @@ class LWX
             tag = tag.substring(0, tag.length - 1)
         }
 
-
-        // also split any namespaces from the tag
         let tag_split = tag.split(":")
         tag = tag_split.pop()
 
@@ -397,23 +419,29 @@ class LWX
             this.#data = ""
 
             // w3 2.2: check if root node is the only node that exists (it should)
-            // if (this.#nodes.length > 0 && tag_split[0] == this.#nodes[0].name)
-            //     warn(`Root node '${tag_split[0]}' should only appear once.`)
+            if (this.#root==tag_split[0])
+                warn(`Root node '${tag_split[0]}' should only appear once.`)
 
             
             // split the tag into important parts
             // w3 2.3: check if tag contains ; (reserved for experimental namespaces)
-            if (this.#debug && tag_split[0].includes(";"))
+            if (this.#options.debug && tag_split[0].includes(";"))
                 warn(`XML name '${tag_split[0]}' should not contain ';', in the future this will be reserved for namespaces.`)
 
             
             // construct a new default node
-            let node = {}
+            let node = {
+                
+                // name: this.preprocess_tag(tag_split[0]),
+                // attributes: {},
+                // parent: null
+            }
             let name = this.preprocess_tag(tag_split[0])
+
+            // make circular link with parent
             node[name] = {}
-            // use an invalid key for internal use so it will not conflict
-            node["<name>"] = name
-            node['<attributes>'] = {}
+            node["@name"] = name
+            node['@attributes'] = {}
 
             // collect all attributes -- skip 1 for the tag name
             for (var i=1; i<tag_split.length && i<tag_split.length-1; i+=2)
@@ -423,7 +451,7 @@ class LWX
                 // add any attributes into the global attributes array
                 this.#attributes[tag_split[i]] = value
                 // also add it into local
-                node['<attributes>'][tag_split[i]] = value
+                node['@attributes'][tag_split[i]] = value
             }
 
 
@@ -439,39 +467,35 @@ class LWX
         }
     }
 
-    navigate_root()
-    {
-        while (!this.#tree.root)
-        {
-            this.navigate_outside()
-        }
-    }
-
     navigate_inside(node)
     {
-        node.parent = this.#tree
+        node["@parent"] = this.#tree
 
         // copy all of the local data into the global data
-        this.#attributes = Object.assign({}, node['<attributes>'], this.#attributes)
-
+        this.#attributes = Object.assign({}, node['@attributes'], this.#attributes)
 
         if (!this.#tree) {
-            node.parent = node
-            node.root = true
+            node["@parent"] = node
+            node["@root"] = true
+            this.#root = node
             return this.#tree = node
         }
 
+        let name = this.#tree["@name"]
+        let child = node["@name"]
 
-        if (this.#tree[this.#tree["<name>"]][node["<name>"]] && !Array.isArray(this.#tree[this.#tree["<name>"]][node["<name>"]]))
-            this.#tree[this.#tree["<name>"]][node["<name>"]] = [this.#tree[this.#tree["<name>"]][node["<name>"]]]
+        
+        if (this.#tree[name][child] && !Array.isArray(this.#tree[name][child]))
+            this.#tree[name][child] = [this.#tree[name][child]]
 
-        if (Array.isArray(this.#tree[this.#tree["<name>"]][node["<name>"]]))
+
+        if (Array.isArray(this.#tree[name][child]))
         {
-            this.#tree[this.#tree["<name>"]][node["<name>"]].push(node[node["<name>"]])
+            this.#tree[name][child].push(node[child])
         }
         else
         {
-            this.#tree[this.#tree["<name>"]][node["<name>"]] = node[node["<name>"]]
+            this.#tree[name][child] = node[child]
         }
 
         this.#tree = node
@@ -483,9 +507,21 @@ class LWX
         {
             // first apply any attributes on the string
 
-            if (this.#attributes['xml:space'] != "preserve") content = content.trim()
+            if (!this.#options.preserve_whitespace && this.#attributes['xml:space'] != "preserve") content = content.trim()
             
-            // convert attribute into numerical values?
+            // convert decimals and hex strings to numbers
+            if (this.#options.convert_values)
+            {
+                if (!isNaN(content)) {
+                    // test if it is hex
+                    if (content.includes("x"))
+                        content = Number.parseInt(content, 16)
+                    else if (content.includes("."))
+                        content = Number.parseFloat(content)
+                    else
+                        content = Number.parseInt(content)
+                }
+            }
 
             return content
         }
@@ -496,39 +532,60 @@ class LWX
     {
 
         content = this.process_content(content)
+
+        // console.log(this.#tree)
+        let name = this.#tree["@parent"]["@name"]
+        let child = this.#tree["@name"]
         // if the child is an array
-        if (Array.isArray(this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]]))
+        if (Array.isArray(this.#tree["@parent"][name][child]))
         {
-            this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]].pop()
-            this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]].push(content)
+            this.#tree["@parent"][name][child].pop()
+            this.#tree["@parent"][name][child].push(content)
         } else {
             //check if circular root obj
-            if (this.#tree.root)
+            if (this.#tree["@root"])
             {
-                this.#tree[this.#tree["<name>"]] = content
+                this.#tree[child] = content
             } else {
-                this.#tree.parent[this.#tree.parent["<name>"]][this.#tree["<name>"]] = content
+                this.#tree["@parent"][name][child] = content
             }
         }
     }
 
     navigate_outside()
     {   
-
-
-
-        // navigate outside and clean up any internal variables used
-        delete this.#tree['<name>']
-        delete this.#tree['<attributes>']
-
-
-        let temp = this.#tree.parent
-        delete this.#tree.parent
+        let temp = this.#tree["@parent"]
+        delete this.#tree["@parent"]
         this.#tree = temp
 
-        // update our gobal attributes to our local attributes
-        this.#attributes = Object.assign({}, this.#tree['<attributes>'])
+        // update our gobal attributes to our local attributes since we are stepping backwards
+        this.#attributes = Object.assign({}, this.#tree['@attributes'])
     }
+
+
+    /**************************************************************************************************\
+        functions for node-based parsing. maybe 15% faster and much less code, but higher memory usage
+    \**************************************************************************************************/
+    // navigate_inside(node)
+    // {
+    //     let new_node = new XMLNode(node.name, this.#tree)
+    //     new_node.atrributes = node.attributes;
+
+    //     if (!this.#tree) return this.#tree = new_node
+
+    //     this.#tree.children.push(new_node)
+    //     this.#tree = new_node
+    // }
+
+    // add_content(content)
+    // {
+    //     this.#tree.content = this.process_content(content)
+    // }
+
+    // navigate_outside()
+    // {
+    //     this.#tree = this.#tree["@parent"]
+    // }
 }
 
 module.exports = {parseFile, parseFileSync, parseString, parseStringSync}

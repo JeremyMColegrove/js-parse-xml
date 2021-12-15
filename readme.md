@@ -1,10 +1,4 @@
 ## **Description**
-### **Update Dec 13th: We recommend upgrading to version 2.0 as soon as possible**
-**Whats new**
-1. Improved speed performance by ~200%
-2. Fixed issue involving escaped XML characters
-3. Fixed issue involving potentially conflicting internal and XML keys
-
 js-parse-xml was inspired by the need for an extremely lightweight performant XML parser. XML is part of every day business life and therefore extremely important to get right. To make sure js-parse-xml adheres to industry standards, the standard authority for XML structure is being used [REC-xml-19980210](https://www.w3.org/TR/1998/REC-xml-19980210)
 
 ## **Features**
@@ -97,7 +91,7 @@ Output JSON:
 If you are trying to access the content of the "p" tag, you can simply access like you would a normal object
 
 ```
-let content = json['world-patent-data']['exchange-documents']['abstract']['p']
+let content = json['world-patent-data']['exchange-documents']['exchange-document']['abstract']['p']
 ```
 
 
