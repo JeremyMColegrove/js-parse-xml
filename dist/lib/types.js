@@ -6,6 +6,6 @@ exports.defaultOptions = {
     stream: false,
     preserve_whitespace: false,
     convert_values: true,
-    debug: true,
-    benchmark: false
+    strict: true,
+    simplify: true
 };

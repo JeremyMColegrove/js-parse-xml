@@ -3,8 +3,8 @@ export interface Options {
     stream?:boolean;
     preserve_whitespace?:boolean;
     convert_values?:boolean;
-    debug?:boolean;
-    benchmark?:boolean;
+    strict?: boolean;
+    simplify?: boolean
   }
 
 export interface Token {
@@ -13,11 +13,18 @@ export interface Token {
     line: number | null;
   }
 
-export const defaultOptions = {
+export interface Node {
+  name: string;
+  attributes: Object |  any;
+  children: Array<Node>;
+  content: any;
+}
+
+export const defaultOptions:Options = {
     encoding: "utf-8",
     stream: false,
     preserve_whitespace: false,
     convert_values: true,
-    debug: true,
-    benchmark: false
+    strict:true,
+    simplify: true
 }

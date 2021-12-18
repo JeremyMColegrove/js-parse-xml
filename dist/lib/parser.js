@@ -1,32 +1,30 @@
 "use strict";
 var tokenizer_1 = require("./tokenizer");
 var types_1 = require("./types");
+var Logger = require("./logger");
+var Simplifier = require("./simplifier");
 var Parser = /** @class */ (function () {
     function Parser(options) {
         this._tokenizer = new tokenizer_1.Tokenizer();
+        this._logger = new Logger();
+        this._simplifier = new Simplifier();
         this._branch = null;
         this._root = null;
         this._attributes = {};
         this._options = Object.assign({}, types_1.defaultOptions, options);
         // making sure same number of start and end tags
         this._tag_balance = 0;
-        if (this._options.benchmark)
-            console.time("benchmark");
     }
     Parser.prototype.finish = function () {
         if (!this._branch)
             return null;
         // not enough end tags
         if (this._tag_balance > 0) {
-            throw new SyntaxError(this.syntaxErrorMessage("Unexepcted end of input", -1));
+            this.error("Unexepcted end of input", -1);
         }
-        // remove any temporary variables
-        delete this._branch["@root"];
-        delete this._branch["@name"];
-        delete this._branch["@parent"];
-        delete this._branch["@attributes"];
-        if (this._options.benchmark)
-            console.timeEnd("benchmark");
+        if (this._options.simplify) {
+            return this.simplify(this._branch);
+        }
         return this._branch;
     };
     Parser.prototype.feed = function (xml) {
@@ -57,47 +55,80 @@ var Parser = /** @class */ (function () {
                     this.handleCommentToken(token);
                     break;
                 default:
-                    throw new Error(this.syntaxErrorMessage("Could not process unknown token '".concat(token.type, "'"), token.line));
+                    this.error("Could not process unknown token '".concat(token.type, "'"), token.line);
             }
+        }
+    };
+    Parser.prototype.simplify = function (object) {
+        return this._simplifier.simplify(object);
+    };
+    Parser.prototype.error = function (message, lineNo) {
+        message = "".concat(message, ": line ").concat(lineNo);
+        if (this._options.strict) {
+            throw new SyntaxError(message);
+        }
+        else {
+            this._logger.warning(message);
         }
     };
     Parser.prototype.syntaxErrorMessage = function (message, lineNo) {
         return "".concat(message, ": line ").concat(lineNo);
     };
     Parser.prototype.handleStartTagToken = function (token) {
-        var name;
         var node;
+        var name;
         this._tag_balance++;
         name = this.stripTag(token);
         node = {
-            "@name": name,
-            "@attributes": {},
-            "@parent": this._branch
+            name: name,
+            attributes: {},
+            "@parent": this._branch,
+            content: null,
+            children: []
         };
-        //@ts-ignore (gives error about undefined value)
-        node[name] = {};
-        // copy all of the local data into the global data
-        // this.#attributes = Object.assign({}, node['@attributes'], this.#attributes)
         if (!this._branch) {
             node["@parent"] = node;
-            node["@root"] = true;
+            this._branch = node;
             this._root = node;
-            return this._branch = node;
+            return;
         }
-        if (name == this._root["@name"]) {
-            throw new SyntaxError(this.syntaxErrorMessage("Multiple root tags with name '".concat(name, "'"), token.line));
-        }
-        var value = this._branch["@name"];
-        var child = node["@name"];
-        if (this._branch[value][child] && !Array.isArray(this._branch[value][child]))
-            this._branch[value][child] = [this._branch[value][child]];
-        if (Array.isArray(this._branch[value][child])) {
-            this._branch[value][child].push(node[child]);
-        }
-        else {
-            this._branch[value][child] = node[child];
-        }
+        this._branch.children.push(node);
         this._branch = node;
+        // let name: string | undefined;
+        // let node: any
+        // this._tag_balance ++
+        // name = this.stripTag(token)
+        // node = {
+        //     "@name":name, 
+        //     "@attributes":{},
+        //     "@parent":this._branch
+        // }
+        // //@ts-ignore (gives error about undefined value)
+        // node[name] = {}
+        // // copy all of the local data into the global data
+        // // this.#attributes = Object.assign({}, node['@attributes'], this.#attributes)
+        // if (!this._branch) {
+        //     node["@parent"] = node
+        //     node["@root"] = true
+        //     this._root = node
+        //     return this._branch = node
+        // }
+        // if (name == this._root["@name"]) {
+        //     this.error(`Multiple root tags with name '${name}'`, token.line)
+        // }
+        // let value = this._branch["@name"]
+        // let child = node["@name"]
+        // if (this._branch[value][child] && !Array.isArray(this._branch[value][child]))
+        //     this._branch[value][child] = [this._branch[value][child]]
+        // if (Array.isArray(this._branch[value][child]))
+        // {
+        //     this._branch[value][child].push(node[child])
+        // }
+        // else
+        // {
+        //     this._branch[value][child] = node[child]
+        // }
+        // this._branch = node
     };
     Parser.prototype.handleSelfClosingToken = function (token) {
         //handle the tag name and then pass to both StartToken and EndToken
@@ -106,31 +137,35 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.handleEndTagToken = function (token) {
         this._tag_balance--;
-        if (this.stripTag(token) != this._branch["@name"]) {
-            throw new SyntaxError(this.syntaxErrorMessage("Found mismatched start/end tag <".concat(this._branch["@name"], "> ").concat(token.value), token.line));
+        if (this.stripTag(token) != this._branch.name) {
+            this.error("Found mismatched start/end tag <".concat(this._branch.name, "> ").concat(token.value), token.line);
         }
-        // navigate out
-        this._branch = this._branch["@parent"];
+        // // navigate out
+        // this._branch = this._branch["@parent"]
+        var parent = this._branch["@parent"];
+        delete this._branch["@parent"];
+        this._branch = parent;
     };
     Parser.prototype.handleContentToken = function (token) {
+        this._branch.content = this.processContent(token.value);
         // add content
-        var content = this.processContent(token.value);
-        var value = this._branch["@parent"]["@name"];
-        var child = this._branch["@name"];
-        // if the child is an array
-        if (Array.isArray(this._branch["@parent"][value][child])) {
-            this._branch["@parent"][value][child].pop();
-            this._branch["@parent"][value][child].push(content);
-        }
-        else {
-            //check if circular root obj
-            if (this._branch["@root"]) {
-                this._branch[child] = content;
-            }
-            else {
-                this._branch["@parent"][value][child] = content;
-            }
-        }
+        // let content = this.processContent(token.value)
+        // let value = this._branch["@parent"]["@name"]
+        // let child = this._branch["@name"]
+        // // if the child is an array
+        // if (Array.isArray(this._branch["@parent"][value][child]))
+        // {
+        //     this._branch["@parent"][value][child].pop()
+        //     this._branch["@parent"][value][child].push(content)
+        // } else {
+        //     //check if circular root obj
+        //     if (this._branch["@root"])
+        //     {
+        //         this._branch[child] = content
+        //     } else {
+        //         this._branch["@parent"][value][child] = content
+        //     }
+        // }
     };
     Parser.prototype.handleCDATAToken = function (token) {
         // strip the CDATA tag and pass it as a ContentTokenLiteral
@@ -139,18 +174,18 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.handleParamToken = function (token) {
         if (this._root) {
-            throw new SyntaxError(this.syntaxErrorMessage("Invalid parameter tag position", token.line));
+            this.error("Invalid parameter tag position", token.line);
         }
         // check that <? ends with ?> 
         if (token.value[1] == "?" && token.value[1] != token.value[token.value.length - 2]) {
-            throw new SyntaxError(this.syntaxErrorMessage("Invalid parameter tag '".concat(token.value, "'"), token.line));
+            this.error("Invalid parameter tag '".concat(token.value, "'"), token.line);
         }
     };
     Parser.prototype.handleCommentToken = function (token) {
         var text = token.value.substring(4, token.value.length - 3);
         // make sure -- is not in comment ( illegal )
         if (text.includes("--")) {
-            throw new SyntaxError(this.syntaxErrorMessage("Invalid character sequence '--' in comment", token.line));
+            this.error("Invalid character sequence '--' in comment", token.line);
         }
     };
     // string processing helper functions
@@ -175,7 +210,7 @@ var Parser = /** @class */ (function () {
         regex = new RegExp(/([^.\-A-Za-z0-9_:])|(^[0-9._\-:])/);
         match = regex.test(tag);
         if (match) {
-            throw new SyntaxError(this.syntaxErrorMessage("Unexpected character found in '".concat(tag, "'"), token.line));
+            this.error("Unexpected character found in '".concat(tag, "'"), token.line);
         }
         // remove namespace
         var tag_split = tag.split(":");

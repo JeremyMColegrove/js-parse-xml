@@ -5,6 +5,7 @@ Hello there :wave: This is the homepage for a well-formed XML document parser th
 3. Small package size (~24KB)
 4. Fast parsing (~40 MB/s)
 5. Well-formed XML validation
+6. Customizable
 
 # **Getting Started :yum:**
 
@@ -17,7 +18,7 @@ Hello there :wave: This is the homepage for a well-formed XML document parser th
 **ES5**<br>
 ``` const {Parser, parseString, parseStringSync, parseFile, parseFileSync} = require("js-parse-xml")```
 
-### **Parser class **
+### **Parser class**
 | Method                   | Description                                                                        |
 |--------------------------|------------------------------------------------------------------------------------|
 | Parser(options?): Class  | Default constructor. Takes in an optional Options argument for customization.      |
@@ -25,15 +26,16 @@ Hello there :wave: This is the homepage for a well-formed XML document parser th
 | finish() : Object        | Returns the finished, simplified parsed JSON object.                               |
 
 
-### **Nice functions **
+### **Nice functions**
 | Method                                            | Description                                                                                       |
 |---------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | parseString(xml: string, options?): Object        | Parses the XML passed in asynchronously and returns the final JSON object.                        |
 | parseStringSync(xml: string, options?): Object    | Parses the XML synchronously and returns the final JSON object.                                   |
 | parseFile(filename: string, options?): Object     | Reads and parses the file specified by filename asynchronously. Returns the final JSON object.    |
 | parseFileSync(filename: string, options?): Object | Reads and parses the file specified by the filename synchronously. Resurns the final JSON object. |
+| simplify(object: Object): Object | Simplifies a node structure. Similarily, you can set the simplify option before parsing to do this automatically |
 
-### **Options **
+### **Options**
 These are all of the available/default options
 ```
 let options = {
@@ -41,8 +43,8 @@ let options = {
     stream: false,
     preserve_whitespace: false,
     convert_values: true,
-    debug: true,
-    benchmark: false
+    strict: true,
+    simplify: true
   }
 ```
 
@@ -65,7 +67,7 @@ Input XML:
 </ops:world-patent-data>
 ```
 
-Output JSON:
+Simple Output JSON:
 ```
 {
   "world-patent-data": {
