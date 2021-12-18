@@ -1,5 +1,7 @@
 "use strict";
-// default exports for the library
+/**
+ * @remark Hey there
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseStringSync = exports.Parser = void 0;
 var Parser = require("./lib/parser");

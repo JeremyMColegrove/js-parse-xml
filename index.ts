@@ -1,4 +1,6 @@
-// default exports for the library
+/**
+ * @remark Hey there
+ */
 
 import Parser = require("./lib/parser")
 import {Options} from "./lib/types"
