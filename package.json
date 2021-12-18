@@ -24,7 +24,7 @@
     "url": "https://github.com/JeremyMColegrove/js-parse-xml/issues",
     "email": "jeremycolegrove2012@gmail.com"
   },
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "npm run build; npm test",
@@ -36,7 +36,7 @@
   },
   "files": [
     "index.js",
-    "./dist/*",
+    "dist/**",
     "readme.md"
   ],
   "devDependencies": {
