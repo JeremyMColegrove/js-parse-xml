@@ -1,4 +1,4 @@
-let parser = require('./js-parse-xml')
+let parser = require('./index')
 let fs = require('fs')
 
 /***
@@ -31,22 +31,22 @@ function run_all_tests()
             \***************************/
             
             // test for parsing file asynchronously
-            test(file + " parseFile", async ()=>{
-                let result = await parser.parseFile(file_path)
-                expect(result).toStrictEqual(output)
-            })
+            // test(file + " parseFile", async ()=>{
+            //     let result = await parser.parseFile(file_path)
+            //     expect(result).toStrictEqual(output)
+            // })
 
-            // test for parsing file synchronously
-            test(file + " parseFileSync", ()=>{
-                let result = parser.parseFileSync(file_path)
-                expect(result).toStrictEqual(output)
-            })
+            // // test for parsing file synchronously
+            // test(file + " parseFileSync", ()=>{
+            //     let result = parser.parseFileSync(file_path)
+            //     expect(result).toStrictEqual(output)
+            // })
 
-            // test for parsing string asynchronously
-            test(file + " parseString", async ()=>{
-                let result = await parser.parseString(input)
-                expect(result).toStrictEqual(output)
-            })
+            // // test for parsing string asynchronously
+            // test(file + " parseString", async ()=>{
+            //     let result = await parser.parseString(input)
+            //     expect(result).toStrictEqual(output)
+            // })
 
             // test for parsing string synchronously
             test(file + " parseStringSync", ()=>{
