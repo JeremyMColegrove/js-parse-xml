@@ -27,11 +27,6 @@ class Parser {
             console.time("benchmark")
     }
 
-    syntaxErrorMessage(message: string, lineNo: number | null)
-    {
-        return `${message}: line ${lineNo}`
-    }
-
     finish() {
         if (!this._branch) return null
 
@@ -90,9 +85,13 @@ class Parser {
         }
     }
 
+    private syntaxErrorMessage(message: string, lineNo: number | null)
+    {
+        return `${message}: line ${lineNo}`
+    }
     
 
-    handleStartTagToken(token: Token)
+    private handleStartTagToken(token: Token)
     {
         let name: string | undefined;
         let node: any
@@ -143,7 +142,7 @@ class Parser {
         this._branch = node
     }
 
-    handleSelfClosingToken(token: Token)
+    private handleSelfClosingToken(token: Token)
     {
         //handle the tag name and then pass to both StartToken and EndToken
         this.handleStartTagToken(token)
@@ -151,7 +150,7 @@ class Parser {
     }
 
 
-    handleEndTagToken(token: Token)
+    private handleEndTagToken(token: Token)
     {
         this._tag_balance --
 
@@ -165,7 +164,7 @@ class Parser {
 
     }
 
-    handleContentToken(token: Token)
+    private handleContentToken(token: Token)
     {
         // add content
         let content = this.processContent(token.value)
@@ -189,14 +188,14 @@ class Parser {
         }
     }
 
-    handleCDATAToken(token: Token)
+    private handleCDATAToken(token: Token)
     {
         // strip the CDATA tag and pass it as a ContentTokenLiteral
         token.value =  token.value.substring(9, token.value.length - 3)
         this.handleContentToken(token)
     }
 
-    handleParamToken(token: Token)
+    private handleParamToken(token: Token)
     {
         if (this._root)
         {
@@ -209,7 +208,7 @@ class Parser {
         }
     }
 
-    handleCommentToken(token: Token)
+    private handleCommentToken(token: Token)
     {
         let text = token.value.substring(4, token.value.length-3)
         // make sure -- is not in comment ( illegal )
@@ -220,7 +219,7 @@ class Parser {
 
 
     // string processing helper functions
-    stripTag(token: Token) 
+    private stripTag(token: Token) 
     {
         let  tag: string | undefined
         let regex: RegExp
@@ -264,7 +263,7 @@ class Parser {
 
 
     // takes content and parses it into a number
-    processContent(content: string)
+    private processContent(content: string)
     {
         if (Object.prototype.toString.call(content) === "[object String]")
         {

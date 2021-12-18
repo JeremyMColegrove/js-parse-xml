@@ -12,9 +12,6 @@ var Parser = /** @class */ (function () {
         if (this._options.benchmark)
             console.time("benchmark");
     }
-    Parser.prototype.syntaxErrorMessage = function (message, lineNo) {
-        return "".concat(message, ": line ").concat(lineNo);
-    };
     Parser.prototype.finish = function () {
         if (!this._branch)
             return null;
@@ -62,6 +59,9 @@ var Parser = /** @class */ (function () {
                     throw new Error(this.syntaxErrorMessage("Could not process unknown token '".concat(token.type, "'"), token.line));
             }
         }
+    };
+    Parser.prototype.syntaxErrorMessage = function (message, lineNo) {
+        return "".concat(message, ": line ").concat(lineNo);
     };
     Parser.prototype.handleStartTagToken = function (token) {
         var name;

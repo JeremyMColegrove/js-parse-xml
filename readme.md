@@ -1,69 +1,55 @@
-## **Description**
-js-parse-xml was inspired by the need for an extremely lightweight performant XML parser. XML is part of every day business life and therefore extremely important to get right. To make sure js-parse-xml adheres to industry standards, the standard authority for XML structure is being used [REC-xml-19980210](https://www.w3.org/TR/1998/REC-xml-19980210)
+Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! We hope you enjoy this XML parser :blush:
 
-## **Features**
+# **Features :muscle:**
 
 1. Supports file streaming
 2. 0 dependencies
-3. Small package size (~20KB)
-4. Fast parsing (~21 MB/s)
+3. Small package size (~24KB)
+4. Fast parsing (~40 MB/s)
 
-## **Getting Started**
-Simply run ```npm i js-parse-xml``` or ```yarn add js-parse-xml``` and the package can then be use as follows:
+# **Getting Started :smiley:**
 
+### **Install**
+``` npm i js-parse-xml``` Or ``` yarn add js-parse-xml```
+
+**ES6**<br>
+``` import {Parser, parseString, parseStringSync, parseFile, parseFileSync} from "js-parse-xml" ```
+
+**ES5**<br>
+``` const {Parser, parseString, parseStringSync, parseFile, parseFileSync} = require("js-parse-xml")```
+
+### **Parser class :sunglasses:**
+| Method                   | Description                                                                        |
+|--------------------------|------------------------------------------------------------------------------------|
+| Parser(options?): Class  | Default constructor. Takes in an optional Options argument for customization.      |
+| feed(xml: string) : void | Gives the Parser the next line of XML to parse. This works well with file streams. |
+| finish() : Object        | Returns the finished, simplified parsed JSON object.                               |
+|                          |                                                                                    |
+
+
+### **Nice functions :sparkles:**
+| Method                                            | Description                                                                                       |
+|---------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| parseString(xml: string, options?): Object        | Parses the XML passed in asynchronously and returns the final JSON object.                        |
+| parseStringSync(xml: string, options?): Object    | Parses the XML synchronously and returns the final JSON object.                                   |
+| parseFile(filename: string, options?): Object     | Reads and parses the file specified by filename asynchronously. Returns the final JSON object.    |
+| parseFileSync(filename: string, options?): Object | Reads and parses the file specified by the filename synchronously. Resurns the final JSON object. |
+
+### **Options :+1:**
+These are all of the available/default options
 ```
-import parser from 'js-parse-xml'
-``` 
-or 
-```
-let parser = require('js-parse-xml')
-```
-### **Parsing XML**
-js-parse-xml has 4 parsing options -- two asynchronous, and two synchronous.
-
-
-```
-let parser = require('js-parse-xml')
-
-// parse a file asynchronously
-var content = await parser.parseFile('file path', options?)
-
-// parse string asynchronously
-var content = await parser.parseString('string of xml', options?)
-
-// parse a file synchronously
-var content = parser.parseFileSync('file path', options?)
-
-// parse a string synchronously
-var content = parser.parseStringSync('string of xml', options?)
-```
-
-There are also options that you can pass to the parser to modify the way it should behave. The default available options are:
-
-```
-// the default and available options are as follows
-{
-    encoding:'utf8',            // the encoding to use for files
-    stream:false,               // to stream the files (for large files) (only available for async)
-    preserve_whitespace:false,  // preserve whitespace in content
-    convert_values:true,        // convert tag content to numbers if possible
-    debug:true,                 // show / hide warnings while parsing
-    benchmark:false             // prints the time it takes to parse
-}
+let options = {
+    encoding: "utf-8",
+    stream: false,
+    preserve_whitespace: false,
+    convert_values: true,
+    debug: true,
+    benchmark: false
+  }
 ```
 
 
-## **Performance**
-These tests were ran on version 1.2.1
-
-Mac M1 Air: ~21 MB/s
-
-This XML parser is about 99% as fast as the popular fast-xml-parser, but at 20% of the library size.
-
-Unlike most other parsers, js-parse-xml does not use any external data structures to keep track of data while parsing. It constructs the final result as it is parsing. Not only that, but it can stream files, so the only limit to the size of files you can parse is the size of the final result object.
-
-
-## **Output**
+# **Output :fire:**
 XML attributes are used to format the final content, most notability the xml:space attribute. This parser also supports CDATA. It removes the namespaces from the tag names.
 
 Input XML:
@@ -104,7 +90,7 @@ let content = json['world-patent-data']['exchange-documents']['exchange-document
 ```
 
 
-## **Contributing**
+# **Contributing :pray:**
 ### The Future
 Current projects include giving the option to maintain tag attributes in the final json object, and provide support for all possible xml: tag options in accordance with a well-formed xml document. 
 
