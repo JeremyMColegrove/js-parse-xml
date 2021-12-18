@@ -1,12 +1,13 @@
 "use strict";
 var tokenizer_1 = require("./tokenizer");
+var types_1 = require("./types");
 var Parser = /** @class */ (function () {
     function Parser(options) {
         this._tokenizer = new tokenizer_1.Tokenizer();
         this._branch = null;
         this._root = null;
         this._attributes = {};
-        this._options = options;
+        this._options = Object.assign({}, types_1.defaultOptions, options);
         // making sure same number of start and end tags
         this._tag_balance = 0;
         if (this._options.benchmark)

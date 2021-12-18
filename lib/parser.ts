@@ -1,5 +1,5 @@
 import { Tokenizer } from "./tokenizer"
-import {Options, Token} from "./types"
+import {Options, Token, defaultOptions} from "./types"
 
 
 
@@ -13,13 +13,13 @@ class Parser {
     private _options: Options
     private _tag_balance: number
 
-
-    constructor(options:Options) {
+    constructor(options?:Options) {
         this._tokenizer = new Tokenizer()
         this._branch = null
         this._root = null
         this._attributes = {}
-        this._options = options
+        this._options = Object.assign({}, defaultOptions, options)
+
         // making sure same number of start and end tags
         this._tag_balance = 0
 

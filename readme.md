@@ -1,13 +1,12 @@
-Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! We hope you enjoy this XML parser :blush:
-
-# **Features :muscle:**
+Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! We hope you enjoy this XML parser.
 
 1. Supports file streaming
 2. 0 dependencies
 3. Small package size (~24KB)
 4. Fast parsing (~40 MB/s)
+5. Well-formed XML validation
 
-# **Getting Started :smiley:**
+# **Getting Started :yum:**
 
 ### **Install**
 ``` npm i js-parse-xml``` Or ``` yarn add js-parse-xml```
@@ -18,16 +17,15 @@ Hello there :wave: This is the homepage for a well-formed XML document parser th
 **ES5**<br>
 ``` const {Parser, parseString, parseStringSync, parseFile, parseFileSync} = require("js-parse-xml")```
 
-### **Parser class :sunglasses:**
+### **Parser class **
 | Method                   | Description                                                                        |
 |--------------------------|------------------------------------------------------------------------------------|
 | Parser(options?): Class  | Default constructor. Takes in an optional Options argument for customization.      |
 | feed(xml: string) : void | Gives the Parser the next line of XML to parse. This works well with file streams. |
 | finish() : Object        | Returns the finished, simplified parsed JSON object.                               |
-|                          |                                                                                    |
 
 
-### **Nice functions :sparkles:**
+### **Nice functions **
 | Method                                            | Description                                                                                       |
 |---------------------------------------------------|---------------------------------------------------------------------------------------------------|
 | parseString(xml: string, options?): Object        | Parses the XML passed in asynchronously and returns the final JSON object.                        |
@@ -35,7 +33,7 @@ Hello there :wave: This is the homepage for a well-formed XML document parser th
 | parseFile(filename: string, options?): Object     | Reads and parses the file specified by filename asynchronously. Returns the final JSON object.    |
 | parseFileSync(filename: string, options?): Object | Reads and parses the file specified by the filename synchronously. Resurns the final JSON object. |
 
-### **Options :+1:**
+### **Options **
 These are all of the available/default options
 ```
 let options = {

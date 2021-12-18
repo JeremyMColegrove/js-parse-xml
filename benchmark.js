@@ -1,4 +1,5 @@
-let {Parser} = require("./index")
+let {Parser} = require("./dist/index")
+
 var Benchmark = require('benchmark');
 
 var suite = new Benchmark.Suite;

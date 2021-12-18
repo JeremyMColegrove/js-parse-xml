@@ -12,3 +12,12 @@ export interface Token {
     value: string;
     line: number | null;
   }
+
+export const defaultOptions = {
+    encoding: "utf-8",
+    stream: false,
+    preserve_whitespace: false,
+    convert_values: true,
+    debug: true,
+    benchmark: false
+}

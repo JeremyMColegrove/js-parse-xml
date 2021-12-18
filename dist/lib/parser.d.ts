@@ -7,7 +7,7 @@ declare class Parser {
     private _attributes;
     private _options;
     private _tag_balance;
-    constructor(options: Options);
+    constructor(options?: Options);
     finish(): any;
     feed(xml: string): void;
     private syntaxErrorMessage;

@@ -10,11 +10,8 @@ function printTokens(tokenizer)
         console.log(token)
     }
 }
-// let xml = fs.readFileSync("./nasa.xml", "utf-8")
-// tokenizer.init(xml)
-// printTokens(tokenizer)
 
-let parser = new Parser({benchmark:true})
+let parser = new Parser()
 
 fs.createReadStream("./nasa.xml", "utf-8")
 .on("data", chunk=>{

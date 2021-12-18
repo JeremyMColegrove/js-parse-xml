@@ -11,3 +11,11 @@ export interface Token {
     value: string;
     line: number | null;
 }
+export declare const defaultOptions: {
+    encoding: string;
+    stream: boolean;
+    preserve_whitespace: boolean;
+    convert_values: boolean;
+    debug: boolean;
+    benchmark: boolean;
+};
