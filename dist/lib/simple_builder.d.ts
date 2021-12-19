@@ -2,6 +2,7 @@ import Builder = require('./abstracts/builder');
 import { Token, Options } from './types';
 declare class SimpleBuilder extends Builder {
     private _branch;
+    private _finished;
     constructor(options?: Options);
     build(): any;
     handleStartTagToken(token: Token): any;

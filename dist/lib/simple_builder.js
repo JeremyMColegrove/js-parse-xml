@@ -19,7 +19,7 @@ var SimpleBuilder = /** @class */ (function (_super) {
     __extends(SimpleBuilder, _super);
     function SimpleBuilder(options) {
         var _this = _super.call(this, options) || this;
-        _this._branch = null;
+        _this._finished = false;
         return _this;
     }
     SimpleBuilder.prototype.build = function () {
@@ -34,6 +34,9 @@ var SimpleBuilder = /** @class */ (function (_super) {
     SimpleBuilder.prototype.handleStartTagToken = function (token) {
         var name;
         var node;
+        if (this._finished) {
+            this._logger.error("There must be a root element", this._options.strict);
+        }
         name = this.stripTag(token);
         node = {
             "@name": name,
@@ -58,7 +61,7 @@ var SimpleBuilder = /** @class */ (function (_super) {
         }
         else {
             if (typeof this._branch[value] !== "object") {
-                this._logger.error("Invalid XML syntax. Embedded content and tags as child.", this._options.strict);
+                this._logger.error("Invalid XML syntax detected", this._options.strict);
                 this._branch[value] = {};
             }
             this._branch[value][child] = node[child];
@@ -69,7 +72,8 @@ var SimpleBuilder = /** @class */ (function (_super) {
         if (this.stripTag(token) != this._branch["@name"]) {
             this._logger.error("Found mismatched start/end tag <".concat(this._branch["@name"], "> ").concat(token.value), this._options.strict);
         }
-        // navigate out
+        if (this._branch["@root"])
+            this._finished = true;
         this._branch = this._branch["@parent"];
         this._attributes = this._branch["@attributes"];
     };

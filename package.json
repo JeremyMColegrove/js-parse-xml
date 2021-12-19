@@ -1,6 +1,6 @@
 {
   "name": "js-parse-xml",
-  "version": "1.2.5-beta2",
+  "version": "1.2.5-beta3",
   "description": "lightweight Node-JS xml parser",
   "author": {
     "name": "Jeremy Colegrove",
@@ -30,7 +30,8 @@
     "prepublish": "npm run build; npm test",
     "doc": "jsdoc -c ./jsdoc.json",
     "start": "npm run build; node start.js",
-    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest --coverage",
+    "test-commit": "coveralls < coverage/lcov.info",
     "benchmark": "node benchmark.js",
     "build": "tsc"
   },
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "benchmark": "^2.1.4",
+    "coveralls": "^3.1.1",
     "typescript": "^4.5.4"
   }
 }

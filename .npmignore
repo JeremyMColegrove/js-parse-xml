@@ -3,3 +3,4 @@
 node_modules
 ./xmlconfig
 ./out
+coverage

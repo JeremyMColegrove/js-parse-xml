@@ -1,11 +1,4 @@
-export interface Options {
-    encoding?: string;
-    stream?:boolean;
-    preserve_whitespace?:boolean;
-    convert_values?:boolean;
-    strict?: boolean;
-    simplify?: boolean
-  }
+
 
 
 export interface Token {
@@ -21,11 +14,18 @@ export interface Node {
   content: any;
 }
 
+export interface Options {
+  encoding?: BufferEncoding;
+  stream?:boolean;
+  preserve_whitespace?:boolean;
+  convert_values?:boolean;
+  strict?: boolean;
+}
+
 export const defaultOptions:Options = {
     encoding: "utf-8",
     stream:false,
     preserve_whitespace: false,
     convert_values: true,
-    strict:true,
-    simplify: true
-}
+    strict:true
+  }

@@ -4,10 +4,11 @@ import { Token, Options } from './types';
 class SimpleBuilder extends Builder
 {
     private _branch: any
+    private _finished: boolean
 
     constructor(options?: Options) {
         super(options)
-        this._branch = null
+        this._finished = false
     }
 
     build(): any {
@@ -26,6 +27,10 @@ class SimpleBuilder extends Builder
         let name: string | undefined;
         let node: any
         
+        if (this._finished) {
+            this._logger.error("There must be a root element", this._options.strict)
+        }
+
         name = this.stripTag(token)
 
         node = {
@@ -61,7 +66,7 @@ class SimpleBuilder extends Builder
         {
             if (typeof this._branch[value] !== "object")
             {
-                this._logger.error("Invalid XML syntax. Embedded content and tags as child.", this._options.strict)
+                this._logger.error("Invalid XML syntax detected", this._options.strict)
                 this._branch[value] = {}
             }
 
@@ -79,7 +84,9 @@ class SimpleBuilder extends Builder
             this._logger.error(`Found mismatched start/end tag <${this._branch["@name"]}> ${token.value}`, this._options.strict)
         }
 
-        // navigate out
+        if (this._branch["@root"])
+            this._finished = true
+
         this._branch = this._branch["@parent"]
 
         this._attributes = this._branch["@attributes"]

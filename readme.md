@@ -3,12 +3,15 @@
 
 Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! We hope you enjoy this XML parser.
 
-1. Supports file streaming
-2. 0 dependencies
-3. Small package size (~24KB)
-4. Fast parsing (~40 MB/s)
-5. Well-formed XML validation
-6. Customizable
+1. Stream based.
+2. 0 dependencies.
+3. Small package size (~24KB).
+4. Fast parsing (~40 MB/s).
+5. Well-formed XML validation (optional).
+6. Customizable.
+7. Maintains tag order in object.
+8. Custom whitespace handling.
+9. Parses content into correct data types.
 
 # **Getting Started :yum:**
 
@@ -46,8 +49,7 @@ let options = {
     stream: false,
     preserve_whitespace: false,
     convert_values: true,
-    strict: true,
-    simplify: true
+    strict: true
   }
 ```
 

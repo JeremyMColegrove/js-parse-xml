@@ -1,11 +1,4 @@
-export interface Options {
-    encoding?: string;
-    stream?: boolean;
-    preserve_whitespace?: boolean;
-    convert_values?: boolean;
-    strict?: boolean;
-    simplify?: boolean;
-}
+/// <reference types="node" />
 export interface Token {
     type: string;
     value: string;
@@ -16,5 +9,12 @@ export interface Node {
     attributes: Object | any;
     children: Array<Node>;
     content: any;
+}
+export interface Options {
+    encoding?: BufferEncoding;
+    stream?: boolean;
+    preserve_whitespace?: boolean;
+    convert_values?: boolean;
+    strict?: boolean;
 }
 export declare const defaultOptions: Options;
