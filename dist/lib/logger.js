@@ -12,11 +12,23 @@ var Logger = /** @class */ (function () {
     function Logger() {
     }
     // print out warnings and errors
-    Logger.prototype.warning = function (message) {
-        console.warn(BGYELLOW, BLACK, "WARN", RESET, MAGENTA, "js-parse-xml", RESET, message);
+    Logger.prototype.warning = function (message, strict) {
+        if (strict === void 0) { strict = true; }
+        if (strict) {
+            throw new SyntaxError(message);
+        }
+        else {
+            console.warn(BGYELLOW, BLACK, "WARN", RESET, MAGENTA, "js-parse-xml", RESET, message);
+        }
     };
-    Logger.prototype.error = function (message) {
-        console.error(BGRED, BLACK, "ERROR", RESET, MAGENTA, "js-parse-xml", RESET, message);
+    Logger.prototype.error = function (message, strict) {
+        if (strict === void 0) { strict = true; }
+        if (strict) {
+            throw new SyntaxError(message);
+        }
+        else {
+            console.error(BGRED, BLACK, "ERROR", RESET, MAGENTA, "js-parse-xml", RESET, message);
+        }
     };
     return Logger;
 }());

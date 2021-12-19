@@ -1,4 +1,4 @@
-import {Node} from './types'
+import {Node} from '../lib/types'
 
 class Simplifier
 {

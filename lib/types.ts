@@ -7,6 +7,7 @@ export interface Options {
     simplify?: boolean
   }
 
+
 export interface Token {
     type: string;
     value: string;
@@ -22,7 +23,7 @@ export interface Node {
 
 export const defaultOptions:Options = {
     encoding: "utf-8",
-    stream: false,
+    stream:false,
     preserve_whitespace: false,
     convert_values: true,
     strict:true,

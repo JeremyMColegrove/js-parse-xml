@@ -13,14 +13,23 @@ const RESET = "\x1b[0m"
 
 class Logger {
     // print out warnings and errors
-    warning(message: string) : void
+    warning(message: string, strict: boolean = true) : void
     {
-        console.warn(BGYELLOW, BLACK, "WARN", RESET, MAGENTA,"js-parse-xml", RESET, message)
+        if (strict) {
+            throw new SyntaxError(message)
+        } else {
+            console.warn(BGYELLOW, BLACK, "WARN", RESET, MAGENTA,"js-parse-xml", RESET, message)
+        }
     }
 
-    error(message: string) : void
+    error(message: string, strict: boolean = true) : void
     {
-        console.error(BGRED, BLACK, "ERROR", RESET, MAGENTA,"js-parse-xml", RESET, message)
+        if (strict)
+        {
+            throw new SyntaxError(message)
+        } else {
+            console.error(BGRED, BLACK, "ERROR", RESET, MAGENTA,"js-parse-xml", RESET, message)
+        }
     }
 }
 

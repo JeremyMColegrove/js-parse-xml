@@ -1,3 +1,6 @@
+[![Coverage Status](https://coveralls.io/repos/github/JeremyMColegrove/js-parse-xml/badge.svg?branch=main)](https://coveralls.io/github/JeremyMColegrove/js-parse-xml?branch=main)
+
+
 Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! We hope you enjoy this XML parser.
 
 1. Supports file streaming
@@ -117,7 +120,6 @@ You can run tests by running ```npm test```
 Testing is extremely important when it comes to parsers due to the wide range of inputs it can see.
 
 As of right now, only our own tests are implemented. While this is better than nothing, we want to move to a standardized testing to make sure js-parse-xml performs in all scenarios.
-
 
 
 

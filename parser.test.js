@@ -1,4 +1,4 @@
-let parser = require('./index')
+let {Parser, parseStringSync} = require('./dist/index')
 let fs = require('fs')
 
 /***
@@ -29,7 +29,7 @@ function run_all_tests()
             /***************************\
                         tests
             \***************************/
-            
+            let parser = new Parser()
             // test for parsing file asynchronously
             // test(file + " parseFile", async ()=>{
             //     let result = await parser.parseFile(file_path)
@@ -50,7 +50,7 @@ function run_all_tests()
 
             // test for parsing string synchronously
             test(file + " parseStringSync", ()=>{
-                let result = parser.parseStringSync(input)
+                let result = parseStringSync(input)
                 expect(result).toStrictEqual(output)
             })
         }
