@@ -5,7 +5,7 @@ Hello there :wave: This is the homepage for a well-formed XML document parser th
 
 1. Stream based.
 2. 0 dependencies.
-3. Small package size (~24KB).
+3. Small package size
 4. Fast parsing (~40 MB/s).
 5. Well-formed XML validation (optional).
 6. Customizable.
