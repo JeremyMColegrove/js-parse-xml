@@ -27,8 +27,6 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepublish": "npm run build; npm test",
-    "doc": "jsdoc -c ./jsdoc.json",
     "start": "npm run build; node start.js",
     "test": "jest --coverage",
     "test-commit": "coveralls < coverage/lcov.info",
