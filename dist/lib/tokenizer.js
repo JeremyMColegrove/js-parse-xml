@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tokenizer = void 0;
+var types_1 = require("./types");
 var Tokenizer = /** @class */ (function () {
     function Tokenizer() {
         this._string = "",
@@ -108,31 +109,31 @@ var Tokenizer = /** @class */ (function () {
         return false;
     };
     Tokenizer.prototype.ContentLiteral = function () {
-        return this.Literal("ContentLiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_CONTENT);
     };
     Tokenizer.prototype.TagLiteral = function () {
         this._in_tag = false;
-        return this.Literal("StartTagLiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_START);
     };
     Tokenizer.prototype.EndTagLiteral = function () {
         this._in_tag = false;
-        return this.Literal("EndTagLiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_END);
     };
     Tokenizer.prototype.SelfClosingLiteral = function () {
         this._in_tag = false;
-        return this.Literal("SelfClosingLiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_SELF_CLOSING);
     };
     Tokenizer.prototype.ParamTagLiteral = function () {
         this._in_tag = false;
-        return this.Literal("ParamTagLiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_PARAM);
     };
     Tokenizer.prototype.CDATALiteral = function () {
         this._in_tag = false;
-        return this.Literal("CDATALiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_CDATA);
     };
     Tokenizer.prototype.CommentLiteral = function () {
         this._in_tag = false;
-        return this.Literal("CommentLiteral");
+        return this.Literal(types_1.tokenTypes.LITERAL_COMMENT);
     };
     Tokenizer.prototype.Literal = function (type) {
         var literal;

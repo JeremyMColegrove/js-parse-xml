@@ -65,7 +65,7 @@ var Builder = /** @class */ (function () {
         if (Object.prototype.toString.call(content) === "[object String]") {
             // first apply any attributes on the string
             if (this._attributes['xml:space'] && this._attributes['xml:space'] != "default" && this._attributes['xml:space'] != "preserve") {
-                this._logger.warning("Found '".concat(this._attributes["xml:space"], "' instead of 'default' or 'preserve'."), this._options.strict);
+                this._logger.warning("Found '".concat(this._attributes["xml:space"], "' instead of 'default' or 'preserve'."));
             }
             if (!this._options.preserve_whitespace && this._attributes['xml:space'] !== "preserve")
                 content = content.trim();
@@ -97,25 +97,23 @@ var Builder = /** @class */ (function () {
                 // find the next = sign
                 var equals = tag.indexOf("=", whitespace);
                 if (equals > -1) {
-                    cursor = equals;
+                    cursor = equals + 1;
                     var key = tag.slice(whitespace + 1, equals);
-                    // now increment until the " " are found
-                    var double = tag.indexOf("\"", cursor);
-                    var single = tag.indexOf("\'", cursor);
-                    var value = "";
-                    if (double > -1) {
-                        var next = tag.indexOf("\"", double + 1);
-                        value = tag.slice(double + 1, next);
-                        cursor = next;
+                    while (cursor < tag.length && tag[cursor] == " ")
+                        cursor++;
+                    var char = tag[cursor++];
+                    if (char != "\"" && char != "\'") {
+                        this._logger.error("Invalid attribute found.", this._options.strict);
                     }
-                    if (single > -1) {
-                        if (value.length > 0 && double > single) {
-                            var next = tag.indexOf("\'", single + 1);
-                            value = tag.slice(single + 1, next);
-                            cursor = next;
-                        }
+                    var next = tag.indexOf(char, cursor);
+                    if (next < 0) {
+                        this._logger.error("Unexpected end of attribute.", this._options.strict);
                     }
-                    result[key] = value;
+                    else {
+                        var value = tag.slice(cursor, next);
+                        cursor = next + 1;
+                        result[key.trim()] = value.trim();
+                    }
                 }
                 else
                     cursor = tag.length;

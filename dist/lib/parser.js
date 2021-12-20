@@ -7,7 +7,6 @@ var Parser = /** @class */ (function () {
     function Parser(options) {
         this._tokenizer = new tokenizer_1.Tokenizer();
         this._logger = new Logger();
-        // this._simplifier = new Simplifier()
         this._options = Object.assign({}, types_1.defaultOptions, options);
         // the simple or full builder type
         this._builder = new SimpleBuilder(options);
@@ -24,32 +23,33 @@ var Parser = /** @class */ (function () {
     Parser.prototype.feed = function (xml) {
         // prime our token stream
         this._tokenizer.init(xml);
-        var token;
-        while ((token = this._tokenizer.getNextToken())) {
-            switch (token.type) {
-                case "StartTagLiteral":
-                    this.handleStartTagToken(token);
+        var next = null;
+        while ((next = this._tokenizer.getNextToken())) {
+            // checks to see if certain conditions are true, like content can not follow an end tag
+            switch (next.type) {
+                case types_1.tokenTypes.LITERAL_START:
+                    this.handleStartTagToken(next);
                     break;
-                case "SelfClosingLiteral":
-                    this.handleSelfClosingToken(token);
+                case types_1.tokenTypes.LITERAL_SELF_CLOSING:
+                    this.handleSelfClosingToken(next);
                     break;
-                case "ContentLiteral":
-                    this.handleContentToken(token);
+                case types_1.tokenTypes.LITERAL_CONTENT:
+                    this.handleContentToken(next);
                     break;
-                case "EndTagLiteral":
-                    this.handleEndTagToken(token);
+                case types_1.tokenTypes.LITERAL_END:
+                    this.handleEndTagToken(next);
                     break;
-                case "CDATALiteral":
-                    this.handleCDATAToken(token);
+                case types_1.tokenTypes.LITERAL_CDATA:
+                    this.handleCDATAToken(next);
                     break;
-                case "ParamTagLiteral":
-                    this.handleParamToken(token);
+                case types_1.tokenTypes.LITERAL_PARAM:
+                    this.handleParamToken(next);
                     break;
-                case "CommentLiteral":
-                    this.handleCommentToken(token);
+                case types_1.tokenTypes.LITERAL_COMMENT:
+                    this.handleCommentToken(next);
                     break;
                 default:
-                    this._logger.error("Could not process unknown token '".concat(token.type, "'. Try upgrading js-parse-xml to latest version?"), this._options.strict);
+                    this._logger.error("Could not process unknown token '".concat(next.type, "'. Try upgrading js-parse-xml to latest version?"), this._options.strict);
             }
         }
     };

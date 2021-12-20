@@ -93,7 +93,7 @@ class Builder {
             // first apply any attributes on the string
             if (this._attributes['xml:space'] && this._attributes['xml:space'] != "default" && this._attributes['xml:space'] != "preserve")
             {
-                this._logger.warning(`Found '${this._attributes["xml:space"]}' instead of 'default' or 'preserve'.`, this._options.strict)
+                this._logger.warning(`Found '${this._attributes["xml:space"]}' instead of 'default' or 'preserve'.`)
             }
 
             if (!this._options.preserve_whitespace && this._attributes['xml:space'] !== "preserve") 
@@ -134,31 +134,28 @@ class Builder {
                 let equals: number = tag.indexOf("=", whitespace)
                 if (equals > -1)
                 {
-                    cursor = equals
+                    cursor = equals + 1
 
                     let key: string = tag.slice(whitespace + 1, equals)
 
-                    // now increment until the " " are found
-                    let double:number = tag.indexOf("\"", cursor)
-                    let single:number = tag.indexOf("\'", cursor)
+                    while (cursor < tag.length && tag[cursor] == " ") cursor ++
 
-                    let value: string = ""
+                    let char:string = tag[cursor ++]
 
-                    if (double > -1) {
-                        let next: number = tag.indexOf("\"", double + 1)
-                        value = tag.slice(double + 1, next)
-                        cursor = next
+                    if (char != "\"" && char != "\'") {
+                        this._logger.error("Invalid attribute found.", this._options.strict)
                     }
 
-                    if (single > -1) {
-                        if (value.length > 0 && double > single) {
-                            let next: number = tag.indexOf("\'", single + 1)
-                            value = tag.slice(single + 1, next)
-                            cursor = next
-                        } 
-                    }
+                    let next:number = tag.indexOf(char, cursor)
 
-                    result[key] = value
+                    if (next < 0) {
+                        this._logger.error("Unexpected end of attribute.", this._options.strict)
+                    } else {
+                        
+                        let value:string = tag.slice(cursor, next)
+                        cursor = next + 1
+                        result[key.trim()] = value.trim()
+                    }
                 } else cursor = tag.length
             } else cursor = tag.length
         }

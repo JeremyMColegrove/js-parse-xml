@@ -5,7 +5,7 @@ declare class SimpleBuilder extends Builder {
     private _finished;
     constructor(options?: Options);
     build(): any;
-    handleStartTagToken(token: Token): any;
+    handleStartTagToken(token: Token): void;
     handleEndTagToken(token: Token): void;
     handleSelfClosingToken(token: Token): void;
     handleContentToken(token: Token): void;

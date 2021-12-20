@@ -1,5 +1,5 @@
 import { Tokenizer } from "./tokenizer"
-import {Options, Token, Node, defaultOptions} from "./types"
+import {Options, Token, Node, defaultOptions, tokenTypes} from "./types"
 import Logger = require('./logger')
 import Builder = require("./abstracts/builder")
 import SimpleBuilder = require("./simple_builder")
@@ -13,11 +13,9 @@ class Parser {
     private _options: Options
     private _tag_balance: number
 
-
     constructor(options?:Options) {
         this._tokenizer = new Tokenizer()
         this._logger = new Logger()
-        // this._simplifier = new Simplifier()
         
         this._options = Object.assign({}, defaultOptions, options)
 
@@ -26,6 +24,7 @@ class Parser {
 
         // making sure same number of start and end tags
         this._tag_balance = 0
+
     }
 
     finish(): any {
@@ -43,34 +42,35 @@ class Parser {
         // prime our token stream
         this._tokenizer.init(xml)
 
-        let token
-        while ((token = this._tokenizer.getNextToken()))
+        let next: Token | null = null
+        while ((next = this._tokenizer.getNextToken()))
         {
-            switch (token.type)
+            // checks to see if certain conditions are true, like content can not follow an end tag
+            switch (next.type)
             {
-                case "StartTagLiteral":
-                    this.handleStartTagToken(token)
+                case tokenTypes.LITERAL_START:
+                    this.handleStartTagToken(next)
                     break;
-                case "SelfClosingLiteral":
-                    this.handleSelfClosingToken(token)
+                case tokenTypes.LITERAL_SELF_CLOSING:
+                    this.handleSelfClosingToken(next)
                     break
-                case "ContentLiteral":
-                    this.handleContentToken(token)
+                case tokenTypes.LITERAL_CONTENT:
+                    this.handleContentToken(next)
                     break;
-                case "EndTagLiteral":
-                    this.handleEndTagToken(token)
+                case tokenTypes.LITERAL_END:
+                    this.handleEndTagToken(next)
                     break;
-                case "CDATALiteral":
-                    this.handleCDATAToken(token)
+                case tokenTypes.LITERAL_CDATA:
+                    this.handleCDATAToken(next)
                     break
-                case "ParamTagLiteral":
-                    this.handleParamToken(token)
+                case tokenTypes.LITERAL_PARAM:
+                    this.handleParamToken(next)
                     break
-                case "CommentLiteral":
-                    this.handleCommentToken(token)
+                case tokenTypes.LITERAL_COMMENT:
+                    this.handleCommentToken(next)
                     break
                 default:
-                    this._logger.error(`Could not process unknown token '${token.type}'. Try upgrading js-parse-xml to latest version?`, this._options.strict)
+                    this._logger.error(`Could not process unknown token '${next.type}'. Try upgrading js-parse-xml to latest version?`, this._options.strict)
             }
         }
     }

@@ -1,4 +1,4 @@
-import { Token } from "./types";
+import { Token, tokenTypes } from "./types";
 
 export class Tokenizer {
     private _string: string;
@@ -151,47 +151,47 @@ export class Tokenizer {
 
     ContentLiteral() : Token
     {
-        return this.Literal("ContentLiteral")
+        return this.Literal(tokenTypes.LITERAL_CONTENT)
     }
 
     TagLiteral() : Token
     {
         this._in_tag = false
-        return this.Literal("StartTagLiteral")
+        return this.Literal(tokenTypes.LITERAL_START)
     }
 
     EndTagLiteral() : Token
     {
         this._in_tag = false
 
-        return this.Literal("EndTagLiteral")
+        return this.Literal(tokenTypes.LITERAL_END)
     }
     SelfClosingLiteral() : Token
     {
         this._in_tag = false
 
-        return this.Literal("SelfClosingLiteral")
+        return this.Literal(tokenTypes.LITERAL_SELF_CLOSING)
     }
 
     ParamTagLiteral() : Token
     {
         this._in_tag = false
 
-        return this.Literal("ParamTagLiteral")
+        return this.Literal(tokenTypes.LITERAL_PARAM)
     }
 
     CDATALiteral() : Token
     {
         this._in_tag = false
 
-        return this.Literal("CDATALiteral")
+        return this.Literal(tokenTypes.LITERAL_CDATA)
     }
 
     CommentLiteral() : Token
     {
         this._in_tag = false
 
-        return this.Literal("CommentLiteral")
+        return this.Literal(tokenTypes.LITERAL_COMMENT)
     }
 
     Literal(type: string) : Token

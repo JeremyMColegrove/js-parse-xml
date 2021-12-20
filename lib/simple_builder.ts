@@ -48,15 +48,17 @@ class SimpleBuilder extends Builder
         if (!this._branch) {
             node["@parent"] = node
             node["@root"] = true
-            return this._branch = node
+            this._branch = node
+            return
         }
 
         let value = this._branch["@name"]
         let child = node["@name"]
         
         if (this._branch[value][child] && !Array.isArray(this._branch[value][child]))
+        {
             this._branch[value][child] = [this._branch[value][child]]
-
+        }
 
         if (Array.isArray(this._branch[value][child]))
         {
@@ -64,14 +66,12 @@ class SimpleBuilder extends Builder
         }
         else
         {
-            if (typeof this._branch[value] !== "object")
-            {
-                this._logger.error("Invalid XML syntax detected", this._options.strict)
-                this._branch[value] = {}
+            // this is an invalid xml syntax case, where content comes before a pair of tags (tags overwrites content)
+            if (typeof this._branch[value] !== "object") { 
+                this._branch[value] = {} 
             }
 
             this._branch[value][child] = node[child]
-            
         }
 
         this._branch = node
@@ -98,23 +98,29 @@ class SimpleBuilder extends Builder
     }
 
     handleContentToken(token: Token): void {
-        // add content
+        // remove whitespaces, etc
         let content = this.processContent(token.value)
 
         let value = this._branch["@parent"]["@name"]
+
         let child = this._branch["@name"]
 
         // if the child is an array
+        // console.log(this._branch["@parent"][value])
         if (Array.isArray(this._branch["@parent"][value][child]))
         {
-            this._branch["@parent"][value][child].pop()
-            this._branch["@parent"][value][child].push(content)
+            let length: number = this._branch["@parent"][value][child].length
+        
+            this._branch["@parent"][value][child][length - 1] = content
+
         } else {
+            
             //check if circular root obj
             if (this._branch["@root"])
             {
                 this._branch[child] = content
             } else {
+                // check if the second to last item is an object (content can not come after a node)
                 this._branch["@parent"][value][child] = content
             }
         }    

@@ -2,34 +2,22 @@ let fs = require("fs")
 let {Parser, parseStringSync} = require("./dist/index")
 let {Tokenizer} = require("./dist/lib/tokenizer")
 
-function printTokens(tokenizer)
-{
-    let token
-    while ((token = tokenizer.getNextToken()))
-    {
-        // just see how long it takes to perform lexical analysis
-        console.log(token)
-    }
-}
+// function printTokens(tokenizer)
+// {
+//     let token
+//     while ((token = tokenizer.getNextToken()))
+//     {
+//         // just see how long it takes to perform lexical analysis
+//         console.log(token)
+//     }
+// }
 
-let parser = new Parser({strict:false})
+let xml = fs.readFileSync("./example.xml", "utf-8")
 
 console.time("benchmark")
 
-fs.createReadStream("./tests/simple.xml", "utf-8").on("data", chunk=>{
+let json = parseStringSync(xml, {strict:false})
 
-        parser.feed(chunk.toString())
+console.timeEnd("benchmark")
 
-}).on("end", ()=>{
-
-    let json = parser.finish()
-
-    console.timeEnd("benchmark")
-
-    console.log(json)
-
-})
-
-
-
-
+console.log(json)

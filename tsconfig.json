@@ -7,5 +7,5 @@
       "strict": true,
       
     },
-    "exclude": ["experimental"]
+    "exclude": ["experimental", "dist"]
   }

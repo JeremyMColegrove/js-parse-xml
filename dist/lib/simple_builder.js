@@ -50,18 +50,20 @@ var SimpleBuilder = /** @class */ (function (_super) {
         if (!this._branch) {
             node["@parent"] = node;
             node["@root"] = true;
-            return this._branch = node;
+            this._branch = node;
+            return;
         }
         var value = this._branch["@name"];
         var child = node["@name"];
-        if (this._branch[value][child] && !Array.isArray(this._branch[value][child]))
+        if (this._branch[value][child] && !Array.isArray(this._branch[value][child])) {
             this._branch[value][child] = [this._branch[value][child]];
+        }
         if (Array.isArray(this._branch[value][child])) {
             this._branch[value][child].push(node[child]);
         }
         else {
+            // this is an invalid xml syntax case, where content comes before a pair of tags (tags overwrites content)
             if (typeof this._branch[value] !== "object") {
-                this._logger.error("Invalid XML syntax detected", this._options.strict);
                 this._branch[value] = {};
             }
             this._branch[value][child] = node[child];
@@ -82,14 +84,15 @@ var SimpleBuilder = /** @class */ (function (_super) {
         this.handleEndTagToken(token);
     };
     SimpleBuilder.prototype.handleContentToken = function (token) {
-        // add content
+        // remove whitespaces, etc
         var content = this.processContent(token.value);
         var value = this._branch["@parent"]["@name"];
         var child = this._branch["@name"];
         // if the child is an array
+        // console.log(this._branch["@parent"][value])
         if (Array.isArray(this._branch["@parent"][value][child])) {
-            this._branch["@parent"][value][child].pop();
-            this._branch["@parent"][value][child].push(content);
+            var length_1 = this._branch["@parent"][value][child].length;
+            this._branch["@parent"][value][child][length_1 - 1] = content;
         }
         else {
             //check if circular root obj
@@ -97,6 +100,7 @@ var SimpleBuilder = /** @class */ (function (_super) {
                 this._branch[child] = content;
             }
             else {
+                // check if the second to last item is an object (content can not come after a node)
                 this._branch["@parent"][value][child] = content;
             }
         }

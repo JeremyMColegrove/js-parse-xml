@@ -18,3 +18,12 @@ export interface Options {
     strict?: boolean;
 }
 export declare const defaultOptions: Options;
+export declare const tokenTypes: {
+    LITERAL_CONTENT: string;
+    LITERAL_START: string;
+    LITERAL_END: string;
+    LITERAL_SELF_CLOSING: string;
+    LITERAL_PARAM: string;
+    LITERAL_CDATA: string;
+    LITERAL_COMMENT: string;
+};

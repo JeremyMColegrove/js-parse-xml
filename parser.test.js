@@ -1,6 +1,7 @@
 let {Parser, parseStringSync, parseFile, parseString, parseFileSync} = require('./dist/index')
 let Logger = require("./dist/lib/logger")
 let Builder = require("./dist/lib/abstracts/builder")
+let SimpleBuilder = require("./dist/lib/simple_builder")
 let fs = require('fs')
 
 /***
@@ -20,17 +21,13 @@ function run_all_tests()
         expect(logger.error("", false)).toBeUndefined()
     })
 
-    test("Strict logger warning", ()=>{
+    test("Logger warning", ()=>{
         let logger = new Logger()
         const warning = () => {logger.warning("test");}
-        expect(()=>{logger.warning("")}).toThrowError(SyntaxError)
+        expect(logger.warning("")).toBeUndefined()
     })
 
-    test("Soft logger warning", ()=>{
-        let logger = new Logger()
-        expect(logger.warning("test", false)).toBeUndefined()
-    })
-
+    
     // run tests on default Builder class
     test("Builder", () => {
         let builder = new Builder()
@@ -41,10 +38,83 @@ function run_all_tests()
         expect(builder.handleSelfClosingToken).toThrowError(Error)
         expect(builder.handleContentToken).toThrowError(Error)
         expect(builder.handleParamToken).toThrowError(Error)
+        expect(builder.handleEndTagToken).toThrowError(Error)
+        expect(builder.build).toThrowError(Error)
+
+
+    })
+
+    test("SimpleBuilder build", ()=>{
+        let builder = new SimpleBuilder()
+        let b = builder.build()
+        expect(b).toBeUndefined()
+    })
+
+    test("Builder parse content", ()=>{
+        let builder = new Builder()
+        let attrs = builder.parseAttributes({type:"token", value:`<a test='ok'>`, line:0})
+        let attrd = builder.parseAttributes({type:"token", value:`<a test="ok">`, line:0})
+
+        let expected = {test:"ok"}
+        expect(attrs).toStrictEqual(expected)
+        expect(attrd).toStrictEqual(expected)
     })
 
 
-    //look for all of the test files
+    // check all of the errors that would cause a well-formed XML document to fail
+
+    /**
+     * Types of XML validation for well-formed documents
+     * 1) XML document must have a root element
+     * 2) XML (param) prolog must be at start of document
+     * 3) all tags must have closing tag
+     * 4) XML tags are case sensitive
+     * 5) Elements must be properly nested
+     * 6) Attributes must be quoted
+     * 7) Comments can not contain --
+     * 8) White space is preserved (no test for this)
+     */
+
+
+    test("FAIL - Root element", ()=>{
+        let xml = fs.readFileSync("./tests/errors/root_element.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Param at start", ()=>{
+        let xml = fs.readFileSync("./tests/errors/prolog_at_start.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Closing tags", ()=>{
+        let xml = fs.readFileSync("./tests/errors/no_closing.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Case sensitive", ()=>{
+        let xml = fs.readFileSync("./tests/errors/case_sensitive.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Properly nested", ()=>{
+        let xml = fs.readFileSync("./tests/errors/properly_nested.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Quoted attributes", ()=>{
+        let xml = fs.readFileSync("./tests/errors/quoted_attributes.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Bad comment", ()=>{
+        let xml = fs.readFileSync("./tests/errors/bad_comment.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+
+
+    // Run automated tests on files automatically
+
     var files = fs.readdirSync('./tests');
     for (var file of files)
     {
