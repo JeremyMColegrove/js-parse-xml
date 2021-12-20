@@ -1,16 +1,5 @@
 let fs = require("fs")
-let {Parser, parseStringSync} = require("./dist/index")
-let {Tokenizer} = require("./dist/lib/tokenizer")
-
-// function printTokens(tokenizer)
-// {
-//     let token
-//     while ((token = tokenizer.getNextToken()))
-//     {
-//         // just see how long it takes to perform lexical analysis
-//         console.log(token)
-//     }
-// }
+let {Parser, parseStringSync, parseFile, parseString, parseFileSync} = require("./dist/index")
 
 let xml = fs.readFileSync("./example.xml", "utf-8")
 

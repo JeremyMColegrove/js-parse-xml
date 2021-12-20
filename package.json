@@ -27,7 +27,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "start": "npm run build; node start.js",
+    "start": "npm run build && node start.js",
     "test": "jest --coverage",
     "test-commit": "coveralls < coverage/lcov.info",
     "benchmark": "node benchmark.js",
