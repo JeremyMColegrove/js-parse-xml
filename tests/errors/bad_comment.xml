@@ -1,0 +1,6 @@
+<root>
+    <!-- This is a bad -- comment -->
+    <child>
+        Some content
+    </child>
+</root>

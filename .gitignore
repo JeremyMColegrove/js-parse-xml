@@ -1,3 +1,4 @@
 node_modules
-*.xml
+nasa.xml
+psd7003.xml
 coverage
