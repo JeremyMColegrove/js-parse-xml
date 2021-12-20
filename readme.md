@@ -1,4 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/JeremyMColegrove/js-parse-xml/badge.svg?branch=main)](https://coveralls.io/github/JeremyMColegrove/js-parse-xml?branch=main)
+![NPM Downloads](https://img.shields.io/npm/dw/js-parse-xml)
+![NPM License](https://img.shields.io/npm/l/js-parse-xml)
+![NPM Size](https://img.shields.io/github/languages/code-size/JeremyMColegrove/js-parse-xml)
 
 
 Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! We hope you enjoy this XML parser.
