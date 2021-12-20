@@ -30,7 +30,7 @@
     "prepublish": "npm run build; npm test",
     "doc": "jsdoc -c ./jsdoc.json",
     "start": "npm run build; node start.js",
-    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest --coverage",
+    "test": "jest --coverage",
     "test-commit": "coveralls < coverage/lcov.info",
     "benchmark": "node benchmark.js",
     "build": "tsc"
