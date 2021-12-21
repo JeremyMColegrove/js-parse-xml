@@ -1,7 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/JeremyMColegrove/js-parse-xml/badge.svg?branch=main)](https://coveralls.io/github/JeremyMColegrove/js-parse-xml?branch=main&service=github)
 ![NPM Downloads](https://img.shields.io/npm/dw/js-parse-xml)
-![NPM License](https://img.shields.io/npm/l/js-parse-xml)
-![Discord](https://img.shields.io/discord/922658833728413706)
+![https://opensource.org/licenses/ISC](https://img.shields.io/npm/l/js-parse-xml)
+![https://discord.gg/sk2dtMkWhF](https://img.shields.io/discord/922658833728413706)
 
 <img src="./cover.png" width="456">
 
