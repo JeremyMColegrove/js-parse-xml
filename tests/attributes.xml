@@ -1,0 +1,3 @@
+<test xml:space="invalid attribute" test = " a test">  
+    1
+</test>

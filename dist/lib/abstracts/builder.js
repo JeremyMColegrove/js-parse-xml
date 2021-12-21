@@ -62,36 +62,34 @@ var Builder = /** @class */ (function () {
     };
     // takes content and parses it into a number
     Builder.prototype.processContent = function (content) {
-        if (Object.prototype.toString.call(content) === "[object String]") {
-            // first apply any attributes on the string
-            if (this._attributes['xml:space'] && this._attributes['xml:space'] != "default" && this._attributes['xml:space'] != "preserve") {
-                this._logger.warning("Found '".concat(this._attributes["xml:space"], "' instead of 'default' or 'preserve'."));
-            }
-            if (!this._options.preserve_whitespace && this._attributes['xml:space'] !== "preserve")
-                content = content.trim();
-            // convert decimals and hex strings to numbers
-            if (this._options.convert_values) {
-                //@ts-ignore
-                if (!isNaN(content)) {
-                    // test if it is hex
-                    if (content.includes("x"))
-                        return Number.parseInt(content, 16);
-                    else if (content.includes("."))
-                        return Number.parseFloat(content);
-                    else
-                        return Number.parseInt(content);
-                }
-            }
-            // also replace escaped characters like &lt; with <
-            // escape special characters for regex support
-            content = content.replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&amp;/g, '&')
-                .replace(/&apos;/g, '\'')
-                .replace(/&quot;/g, '\"');
-            return content;
+        // first apply any attributes on the string
+        if (this._attributes['xml:space'] && this._attributes['xml:space'] != "default" && this._attributes['xml:space'] != "preserve") {
+            this._logger.warning("Found '".concat(this._attributes["xml:space"], "' instead of 'default' or 'preserve'."));
         }
+        if (!this._options.preserve_whitespace && this._attributes['xml:space'] !== "preserve")
+            content = content.trim();
+        // convert decimals and hex strings to numbers
+        if (this._options.convert_values) {
+            //@ts-ignore
+            if (!isNaN(content)) {
+                // test if it is hex
+                if (content.includes("x"))
+                    return Number.parseInt(content, 16);
+                else if (content.includes("."))
+                    return Number.parseFloat(content);
+                else
+                    return Number.parseInt(content);
+            }
+        }
+        // also replace escaped characters like &lt; with <
+        // escape special characters for regex support
+        content = content.replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&apos;/g, '\'')
+            .replace(/&quot;/g, '\"');
         return content;
+        
     };
     Builder.prototype.parseAttributes = function (token) {
         // take the value of the token and split it into all of the attributes, construct a hashmap

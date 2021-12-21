@@ -111,6 +111,20 @@ function run_all_tests()
         expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
     })
 
+    test("FAIL - Bad Character in tag", ()=>{
+        let xml = fs.readFileSync("./tests/errors/bad_character.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Missing end \" in attribute", ()=>{
+        let xml = fs.readFileSync("./tests/errors/missing_attribute.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
+
+    test("FAIL - Invalid <?xml parameter", ()=>{
+        let xml = fs.readFileSync("./tests/errors/invalid_parameter.xml", "utf-8")
+        expect(()=>parseStringSync(xml)).toThrowError(SyntaxError)
+    })
 
 
     // Run automated tests on files automatically
