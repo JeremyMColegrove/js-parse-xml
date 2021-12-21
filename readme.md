@@ -1,7 +1,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/JeremyMColegrove/js-parse-xml/badge.svg?branch=main)](https://coveralls.io/github/JeremyMColegrove/js-parse-xml?branch=main&service=github)
 ![NPM Downloads](https://img.shields.io/npm/dw/js-parse-xml)
 ![NPM License](https://img.shields.io/npm/l/js-parse-xml)
-
+![Discord](https://img.shields.io/discord/922658833728413706)
 
 Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! Here are some features:
 
@@ -67,7 +67,7 @@ Input XML:
     <exchange-documents>
         <exchange-document>
             <abstract lang="en">
-                <p><![CDATA[<xml>]]></p>
+                <p><![CDATA[&lt;xml>]]></p>
             </abstract>
         </exchange-document>
     </exchange-documents>

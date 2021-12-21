@@ -1,0 +1,6 @@
+{
+    "root":
+        {
+            "child": ["<tag>&", "'Testing!'", "\"Yes\""]
+        }
+}
