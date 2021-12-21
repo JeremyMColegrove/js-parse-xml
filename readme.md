@@ -1,7 +1,7 @@
-[![Coverage Status](https://coveralls.io/repos/github/JeremyMColegrove/js-parse-xml/badge.svg?branch=main)](https://coveralls.io/github/JeremyMColegrove/js-parse-xml?branch=main&service=github)
+<a href='https://coveralls.io/github/JeremyMColegrove/js-parse-xml?branch=main'><img src='https://coveralls.io/repos/github/JeremyMColegrove/js-parse-xml/badge.svg?branch=main' alt='Coverage Status' /></a>
 ![NPM Downloads](https://img.shields.io/npm/dw/js-parse-xml)
-![![ISC License](https://opensource.org/licenses/ISC)](https://img.shields.io/npm/l/js-parse-xml)
-![![Discord](https://discord.gg/sk2dtMkWhF)](https://img.shields.io/discord/922658833728413706)
+<a href='https://opensource.org/licenses/ISC'><img src='https://img.shields.io/npm/l/js-parse-xml' alt='ISC License' /></a>
+<a href='https://discord.gg/sk2dtMkWhF'><img src='https://img.shields.io/discord/922658833728413706' alt='Discord' /></a>
 
 Home of the fastest well-formed XML parser on NPM! <br>
 Chat and ask questions with us on [Discord](https://discord.gg/sk2dtMkWhF).<br>
