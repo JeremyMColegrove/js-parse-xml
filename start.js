@@ -1,12 +1,16 @@
 let fs = require("fs")
 let {Parser, parseStringSync, parseFile, parseString, parseFileSync} = require("./dist/index")
 
-let xml = fs.readFileSync("./example.xml", "utf-8")
+// let xml = fs.readFileSync("./psd7003.xml", "utf-8")
 
 console.time("benchmark")
 
-let json = parseStringSync(xml, {strict:false})
+async function parse() {
+    await parseFile("./psd7003.xml", {strict:true, stream:true})
+    console.timeEnd("benchmark")
+}
 
-console.timeEnd("benchmark")
+parse()
 
-console.log(json)
+
+// console.log(json)
