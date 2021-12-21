@@ -36,7 +36,8 @@
   "files": [
     "index.js",
     "dist/**",
-    "readme.md"
+    "readme.md",
+    "cover.png"
   ],
   "devDependencies": {
     "@types/jest": "^27.0.3",
