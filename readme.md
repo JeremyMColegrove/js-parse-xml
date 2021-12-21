@@ -3,8 +3,6 @@
 ![https://opensource.org/licenses/ISC](https://img.shields.io/npm/l/js-parse-xml)
 ![https://discord.gg/sk2dtMkWhF](https://img.shields.io/discord/922658833728413706)
 
-<img src="./cover.png" width="456">
-
 
 1. Stream based.
 2. 0 dependencies.
