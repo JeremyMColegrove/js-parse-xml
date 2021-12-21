@@ -3,7 +3,7 @@
 ![NPM License](https://img.shields.io/npm/l/js-parse-xml)
 ![Discord](https://img.shields.io/discord/922658833728413706)
 
-Hello there :wave: This is the homepage for a well-formed XML document parser that is light, stream-based, and very fast. It is customizable, but we also provide easy functions for you to use! Here are some features:
+![Server Image](/cover.png)
 
 1. Stream based.
 2. 0 dependencies.
