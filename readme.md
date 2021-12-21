@@ -3,7 +3,8 @@
 ![NPM License](https://img.shields.io/npm/l/js-parse-xml)
 ![Discord](https://img.shields.io/discord/922658833728413706)
 
-![Server Image](/cover.png)
+<img src="./cover.png" width="456">
+
 
 1. Stream based.
 2. 0 dependencies.
