@@ -1,0 +1,11 @@
+<root>
+    <child>
+        &lt;tag&gt;&amp;
+    </child>
+    <child>
+        &apos;Testing!&apos;
+    </child>
+    <child>
+        &quot;Yes&quot;
+    </child>
+</root>

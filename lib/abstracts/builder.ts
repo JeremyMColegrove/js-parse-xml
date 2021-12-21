@@ -114,6 +114,15 @@ class Builder {
                 }
             }
 
+            // also replace escaped characters like &lt; with <
+            // escape special characters for regex support
+
+            content = content.replace(/&lt;/g,     '<')
+                .replace(/&gt;/g,      '>')
+                .replace(/&amp;/g,     '&')
+                .replace(/&apos;/g,    '\'')
+                .replace(/&quot;/g,    '\"');
+
             return content
         }
         return content
