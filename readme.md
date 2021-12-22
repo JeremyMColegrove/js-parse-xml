@@ -5,7 +5,10 @@
 
 Home of the fastest well-formed XML parser on NPM! <br>
 Chat and ask questions with us on [Discord](https://discord.gg/sk2dtMkWhF).<br>
+Try a demo by [clicking here!](https://runkit.com/jeremymcolegrove/jsparsexml-stringsync)<br>
+
 Features:
+
 
 1. Stream based.
 2. 0 dependencies.
@@ -16,6 +19,8 @@ Features:
 7. Maintains tag order in object.
 8. Custom whitespace handling.
 9. Parses content into correct data types (optional).
+
+
 
 # **Getting Started :yum:**
 
