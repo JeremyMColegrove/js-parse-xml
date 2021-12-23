@@ -5,7 +5,7 @@
 
 Home of the fastest well-formed XML parser on NPM! <br>
 Chat and ask questions with us on [Discord](https://discord.gg/sk2dtMkWhF).<br>
-Try a demo by [clicking here!](https://runkit.com/jeremymcolegrove/jsparsexml-stringsync)<br>
+Try a demo by [clicking here!](https://runkit.com/jeremymcolegrove/js-parse-xml-demo)<br>
 
 Features:
 
