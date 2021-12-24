@@ -11,10 +11,11 @@ Features:
 
 
 1. Stream based.
-2. 0 dependencies.
-3. Small package size.
-4. Fast parsing.
-5. Well-formed XML validation.
+2. Can parse large files (Tested up to 700MB)
+3. 0 dependencies.
+4. Small package size.
+5. Fast parsing.
+6. Well-formed XML validation.
 7. Maintains tag order in object.
 8. Customizable whitespace handling.
 9. Parses content into correct data types (optional).
